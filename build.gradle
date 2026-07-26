@@ -1,6 +1,6 @@
 plugins {
-    id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply false
-    id 'architectury-plugin' version '3.4-SNAPSHOT'
+    id 'dev.architectury.loom' version '1.7.435' apply false
+    id 'architectury-plugin' version '3.4.164'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 }
 
@@ -23,24 +23,28 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
-        mavenCentral() {
-            content {
-                includeGroup 'org.projectlombok'
-            }
-        }
+        mavenCentral()
         maven {
             url "https://www.cursemaven.com"
             content {
                 includeGroup "curse.maven"
             }
         }
-        maven { url 'https://maven.nova-committee.cn/s3' }
         maven { url 'https://maven.minecraftforge.net/' }
-        maven { url 'https://maven.parchmentmc.org' }
-        maven { url "https://maven.shedaniel.me/" }
         maven { url "https://maven.terraformersmc.com/releases/" }
-        maven { url "https://api.modrinth.com/maven"}
+        ivy {
+            name = 'OneBotGitHubReleases'
+            url = 'https://github.com/cnlimiter/onebot-client/releases/download'
+            patternLayout {
+                artifact 'v[revision]/[artifact]-[revision].[ext]'
+            }
+            metadataSources {
+                artifact()
+            }
+            content {
+                includeModule 'cn.evole.onebot', 'OneBot-Client'
+            }
+        }
     }
 
     loom {
@@ -63,6 +67,10 @@ subprojects {
         it.options.release = 17
     }
 
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+
     tasks.withType(ProcessResources).configureEach {
 
         var replaceProperties = [
@@ -71,16 +79,18 @@ subprojects {
                 "forge_version"                : forge_version,
                 "forge_loader_version_range"   : forge_loader_version_range,
                 "forge_version_range"          : forge_version_range,
-                "minecraft_version_range"      : minecraft_version_range,
+                "forge_minecraft_version_range": forge_minecraft_version_range,
+                "fabric_minecraft_version_range": fabric_minecraft_version_range,
                 "fabric_api_version"           : fabric_api_version,
+                "fabric_api_version_range"     : fabric_api_version_range,
                 "fabric_loader_version"        : fabric_loader_version,
+                "fabric_loader_version_range"  : fabric_loader_version_range,
+                "modmenu_version"               : modmenu_version,
                 "mod_name"                     : mod_name,
                 "mod_author"                   : mod_author,
                 "mod_id"                       : mod_id,
                 "license"                      : license,
                 "description"                  : project.description,
-                "neoforge_version"             : neoforge_version,
-                "neoforge_loader_version_range": neoforge_loader_version_range,
                 "credits"                      : credits
         ]
 

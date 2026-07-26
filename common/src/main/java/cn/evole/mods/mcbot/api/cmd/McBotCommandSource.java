@@ -38,6 +38,7 @@ public class McBotCommandSource implements CommandSource {
 
     @Override
     public void sendSystemMessage(Component component) {
+        if (!this.buffer.isEmpty()) this.buffer.append('\n');
         this.buffer.append(component.getString());
     }
 
@@ -56,7 +57,7 @@ public class McBotCommandSource implements CommandSource {
         return false;
     }
 
-    public String runCommand(String cmd) {
+    public synchronized String runCommand(String cmd) {
         this.prepareForCommand();
         server.executeBlocking(() -> server.getCommands().performPrefixedCommand(this.createCommandSourceStack(), cmd));
         return this.getCommandResponse();

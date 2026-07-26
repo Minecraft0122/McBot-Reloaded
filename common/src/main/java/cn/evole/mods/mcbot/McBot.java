@@ -2,15 +2,14 @@ package cn.evole.mods.mcbot;
 
 
 import cn.evole.mods.mcbot.api.cmd.McBotCommandSource;
+import cn.evole.mods.mcbot.api.connect.ConnectApi;
 import cn.evole.mods.mcbot.api.event.server.ServerGameEvents;
 import cn.evole.mods.mcbot.common.config.ModConfig;
-import cn.evole.mods.mcbot.common.event.IBotEvent;
 import cn.evole.mods.mcbot.common.event.IChatEvent;
 import cn.evole.mods.mcbot.common.event.IPlayerEvent;
 import cn.evole.mods.mcbot.plugins.cmd.CmdHandler;
 import cn.evole.mods.mcbot.plugins.data.DataHandler;
 import cn.evole.mods.mcbot.util.locale.I18n;
-import cn.evole.onebot.client.OneBotClient;
 import com.iafenvoy.jupiter.ConfigManager;
 import com.iafenvoy.jupiter.ServerConfigManager;
 import net.minecraft.server.MinecraftServer;
@@ -23,7 +22,7 @@ public class McBot {
             ConfigManager.getInstance().registerConfigHandler(ModConfig.INSTANCE);
             ServerConfigManager.registerServerConfig(ModConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
         } catch (Exception e) {
-            LOGGER.error("配置加载错误...");
+            LOGGER.error("配置加载失败", e);
         }
 
         ServerGameEvents.PLAYER_LOGGED_IN.register((server, player) -> IPlayerEvent.loggedIn(player.level(), player));
@@ -35,36 +34,38 @@ public class McBot {
 
 
     public static void onServerStarting(MinecraftServer server) {
+        Constants.startExecutors();
+        isShutdown = false;
         SERVER = server;//获取服务器实例
         I18n.init();
-        commonExecutor.submit(CmdHandler::load);//自定义命令加载
-        commonExecutor.submit(DataHandler::load);//数据加载
+        CmdHandler.load();//在接受消息前完成自定义命令加载
+        DataHandler.load();//在接受消息前完成数据加载
 
     }
 
     public static void onServerStarted(MinecraftServer server) {
         mcBotCommand = new McBotCommandSource(server);
         if (ModConfig.get().getCommon().getAutoOpen().getValue()) {
-            onebot = OneBotClient
-                    .create(ModConfig.get().getBotConfig().build())
-                    .open()
-                    .registerEvents(new IBotEvent());
-            connected = true;
+            ConnectApi.wsConnect();
         }
     }
 
     public static void onServerStopping(MinecraftServer server) {
         isShutdown = true;
         LOGGER.info("▌ §c正在关闭群服互联");
-        commonExecutor.submit(CmdHandler::clear);//自定义命令持久层清空
-        commonExecutor.submit(DataHandler::save);//数据储存
+        ConnectApi.wsDisconnect();
+        Constants.shutdown();
+        CmdHandler.clear();//自定义命令持久层清空
+        DataHandler.save();//异步数据操作结束后再保存
     }
 
     public static void onServerStopped(MinecraftServer server) {
-        ModConfig.get().save();
-        Constants.shutdown();
-        if (onebot != null) {
-            onebot.close();
+        try {
+            ModConfig.get().save();
+        } finally {
+            ConnectApi.wsDisconnect();
+            SERVER = null;
+            mcBotCommand = null;
         }
     }
 }

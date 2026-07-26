@@ -3,8 +3,8 @@ package cn.evole.mods.mcbot.common.event;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 /**
@@ -14,7 +14,7 @@ import java.util.Queue;
  * Version: 1.0
  */
 public class ITickEvent {
-    private static final Queue<MutableComponent> SEND_QUEUE = new LinkedList<>();
+    private static final Queue<MutableComponent> SEND_QUEUE = new ConcurrentLinkedQueue<>();
 
     public static Queue<MutableComponent> sendQueue() {
         return SEND_QUEUE;

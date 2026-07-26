@@ -1,24 +1,21 @@
-name: Question / 询问
-description: Anything you don't understand.
-title: "[Question / 询问] "
+name: 使用咨询
+description: 询问 README 未能解决的安装、配置或使用问题。
+title: "[咨询] "
 labels: [ "question" ]
 body:
   - type: checkboxes
     id: checks
     attributes:
-      label: Checks / 检查
-      description: |
-        Please check that you have done the following things before submitting an issue./在提交问题之前，请检查您是否已完成以下操作。
+      label: 提交前检查
       options:
-        - label: I confirm that I have [searched for existing issues / pull requests](https://github.com/cnlimiter/McBot/issues?q=) before reporting to avoid duplicate reporting./我确认在报告之前我已经搜索了[现有的问题或者拉取请求](https://github.com/cnlimiter/McBot/issues?q=)，以避免重复报告。
+        - label: 我已经阅读 README 并搜索现有 issue，仍未找到答案。
           required: true
-        - label: I confirm that I noted that if I don't follow the instructions, the issue may be closed directly./我确认我已经检查，如果我不按照说明进行操作，该问题可能会被直接关闭。
+        - label: 我不会提交访问令牌、QQ 号、群号、IP 地址等敏感信息。
           required: true
   - type: textarea
     id: description
     attributes:
-      label: Description / 描述
-      description: |
-        Please tell us what the question is with a clear and detailed description, add screenshots to help explain if possible./请通过清晰详细的描述告诉我们问题是什么，如果可能的话，添加截图以帮助解释。
+      label: 问题描述
+      description: 请说明使用环境、已经尝试的方法和具体疑问。
     validations:
       required: true

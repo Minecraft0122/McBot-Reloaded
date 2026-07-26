@@ -44,18 +44,40 @@ public class ModConfig extends AutoInitConfigContainer {
 
     @Override
     protected boolean shouldLoad(JsonObject obj) {
-        int version = obj.get("version").getAsInt();
-        if (version != CURRENT_VERSION && new File(this.path).exists()) {
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
-                FileUtils.copyFile(new File(this.path), new File(CONFIG_FOLDER + File.separator + "config_" + sdf.format(new Date()) + ".json"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Constants.LOGGER.info("Wrong config version {} for mod {}! Automatically use version {} and backup old one.", version, Constants.MOD_NAME, CURRENT_VERSION);
+        if (!obj.has("version") || !obj.get("version").isJsonPrimitive()) {
+            Constants.LOGGER.warn("{} 配置缺少有效的版本号，将备份旧配置并生成新配置。", Constants.MOD_NAME);
+            backupCurrentConfig();
             return false;
-        } else Constants.LOGGER.info("{} config version match.", Constants.MOD_NAME);
+        }
+
+        final int version;
+        try {
+            version = obj.get("version").getAsInt();
+        } catch (RuntimeException e) {
+            Constants.LOGGER.warn("{} 配置版本号无效，将备份旧配置并生成新配置。", Constants.MOD_NAME);
+            backupCurrentConfig();
+            return false;
+        }
+
+        if (version != CURRENT_VERSION && new File(this.path).exists()) {
+            backupCurrentConfig();
+            Constants.LOGGER.info("{} 配置版本不匹配：当前为 {}，需要 {}。旧配置已备份，将生成新配置。", Constants.MOD_NAME, version, CURRENT_VERSION);
+            return false;
+        } else Constants.LOGGER.info("{} 配置版本检查通过。", Constants.MOD_NAME);
         return true;
+    }
+
+    private void backupCurrentConfig() {
+        File currentConfig = new File(this.path);
+        if (!currentConfig.isFile()) return;
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+            File backup = new File(CONFIG_FOLDER + File.separator + "config_" + sdf.format(new Date()) + ".json");
+            FileUtils.copyFile(currentConfig, backup);
+        } catch (IOException e) {
+            throw new IllegalStateException("无法备份旧配置文件", e);
+        }
     }
 
     @Override

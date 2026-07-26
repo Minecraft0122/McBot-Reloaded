@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Example Issue / 议题实例
-    url: https://github.com/Nova-Committee/McBot/issues/99
-    about: You can refer to this example issue to fill in your issue.
-  - name: McBot Docs / McBot 文档
-    url: https://wiki.nova-committee.cn/project-1/doc-1/
-    about: Make sure you follow the docs to configure McBot!
-  - name: Latest Builds / 最新构建
-    url: https://github.com/Nova-Committee/McBot/actions
-    about: You can find the latest build JAR files at GitHub Actions.
+  - name: 使用文档
+    url: https://github.com/Minecraft0122/McBot-Reloaded#readme
+    about: 提交问题前，请先按照 README 检查安装与配置。
+  - name: 最新构建
+    url: https://github.com/Minecraft0122/McBot-Reloaded/actions
+    about: 可在 GitHub Actions 中下载最新构建产物。
+  - name: 上游问题列表
+    url: https://github.com/Nova-Committee/McBot/issues
+    about: 可以查看上游是否已经报告过相同问题。

@@ -1,7 +1,5 @@
 package cn.evole.mods.mcbot.util;
 
-import cn.evole.mods.mcbot.Constants;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,8 +15,8 @@ public class FileUtils {
         if (!folder.toFile().isDirectory()) {
             try {
                 return Files.createDirectories(folder);
-            } catch (IOException ignored) {
-                return folder;
+            } catch (IOException e) {
+                throw new IllegalStateException("无法创建目录：" + folder, e);
             }
         } else {
             return folder;
@@ -26,38 +24,14 @@ public class FileUtils {
     }
 
     public static Path checkFile(Path file) {
-        if (!file.toFile().isFile()) {
-            try {
-                return Files.createFile(file);
-            } catch (IOException ignored) {
-                return file;
-            }
-        } else {
-            return file;
-        }
-    }
-
-
-    private static Path resourcePackDirPath;
-
-    public static void setResDirPath(Path path) {
-        safeCreateDir(path);
-        resourcePackDirPath = path;
-    }
-
-
-    private static void safeCreateDir(Path path) {
+        if (Files.isRegularFile(file)) return file;
         try {
-            if (!Files.isDirectory(path)) {
-                Files.createDirectories(path);
-            }
-        } catch (Exception e) {
-            Constants.LOGGER.warn("Cannot create dir: {}", String.valueOf(e));
+            Path parent = file.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            return Files.createFile(file);
+        } catch (IOException e) {
+            throw new IllegalStateException("无法创建文件：" + file, e);
         }
-    }
-
-    public static Path getResPackPath(String filename) {
-        return resourcePackDirPath.resolve(filename);
     }
 
 }

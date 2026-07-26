@@ -1,45 +1,59 @@
-name: 'Build'
+name: '持续集成'
 
 on:
-  workflow_call:
   push:
     branches:
-      - 'multi/*'
+      - '**'
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
-  statuses: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    name: 'Build'
+    name: '测试并构建 Fabric / Forge'
     runs-on: windows-latest
-    strategy:
-      matrix:
-        loader: [ 'forge', 'fabric' ]
+    timeout-minutes: 30
 
     steps:
-      - name: 'Checkout repository'
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 100
-          fetch-tags: true
+      - name: '检出仓库'
+        uses: actions/checkout@v7
 
-      - name: 'Set up JDK 17'
-        uses: actions/setup-java@v3
+      - name: '配置 JDK 17'
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 'Build ${{ matrix.loader }} with Gradle'
-        uses: gradle/gradle-build-action@v2
+      - name: '配置 Gradle'
+        uses: gradle/actions/setup-gradle@v6
         with:
-          arguments: :${{ matrix.loader }}:build
-          cache-read-only: false
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
 
-      - name: 'Upload ${{ matrix.loader }} artifacts'
-        uses: actions/upload-artifact@v4
+      - name: '运行测试并构建全部加载器'
+        shell: pwsh
+        run: .\gradlew.bat clean build --no-daemon --stacktrace
+
+      - name: '上传可安装构建产物'
+        uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
-          name: 'Artifacts-${{ matrix.loader }}'
-          path: ${{ matrix.loader }}/build/libs/*.jar
+          name: McBot-${{ github.sha }}
+          retention-days: 14
+          path: |
+            fabric/build/libs/*-fabric.jar
+            forge/build/libs/*-forge.jar
+
+      - name: '上传测试报告'
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: ignore
+          name: test-reports-${{ github.sha }}
+          retention-days: 7
+          path: common/build/reports/tests/

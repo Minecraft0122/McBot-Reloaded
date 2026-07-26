@@ -1,21 +1,17 @@
 package cn.evole.mods.mcbot.util;
 
-import cn.evole.mods.mcbot.Constants;
 import cn.evole.mods.mcbot.api.cmd.Cmd;
 import cn.evole.mods.mcbot.api.data.UserInfoApi;
 import cn.evole.mods.mcbot.common.config.ModConfig;
 import cn.evole.mods.mcbot.plugins.cmd.CmdHandler;
 import cn.evole.onebot.sdk.event.message.GroupMessageEvent;
-import com.google.common.collect.Maps;
 import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Project: McBot
@@ -25,26 +21,12 @@ import java.util.regex.Pattern;
  */
 public class CmdUtils {
 
-    public static final Map<String, String> VARS = Maps.newConcurrentMap();
-
-    private final static String VAR_REGEX = "(%(\\w+)+%)+";
-    public static String findSimpleCmd(String command) {
-        // 找到最后一个空格的位置
-        int lastSpaceIndex = command.lastIndexOf(" ");
-        // 如果没有空格，则整个命令就是关键词
-        if (lastSpaceIndex == -1) {
-            return command;
-        }
-        // 返回最后一个空格之前的内容
-        return command.substring(0, lastSpaceIndex);
-    }
-
     public static boolean hasPermission(String group_id, String user_id, Cmd cmd){
-        if (cmd.getId().equals("bind")) return true;
-        else return  (UserInfoApi.get(group_id, user_id) != null &&
-                UserInfoApi.get(group_id, user_id).getPermissions().contains(ModConfig.get().getBotConfig().getTag().getValue() + ".mcbot.cmd." + cmd.getId())
-                || cmd.getAllow_members().contains(user_id)
-        );
+        if (cmd == null) return false;
+        if (cmd.getId().equals("bind") || "ALL".equalsIgnoreCase(cmd.getPermission())) return true;
+        val userInfo = UserInfoApi.get(group_id, user_id);
+        return userInfo != null && userInfo.getPermissions().contains(ModConfig.get().getBotConfig().getTag().getValue() + ".mcbot.cmd." + cmd.getId())
+                || cmd.getAllow_members() != null && cmd.getAllow_members().contains(user_id);
     }
 
     /**
@@ -53,7 +35,8 @@ public class CmdUtils {
      * @return 是否是管理员
      */
     public static boolean groupAdminParse(GroupMessageEvent event) {
-        return !event.getSender().getRole().equals("MEMBER") && !event.getSender().getRole().equals("member");
+        String role = event.getSender().getRole();
+        return "admin".equalsIgnoreCase(role) || "owner".equalsIgnoreCase(role);
     }
 
     /**
@@ -64,45 +47,32 @@ public class CmdUtils {
      * @return 处理完的指令
      */
     public static Cmd varParse(GroupMessageEvent event, String cmd) {
-        VARS.put("user_id", event.getSender().getUserId());//初始化变量列表
-        VARS.put("group_id", String.valueOf(event.getGroupId()));
-        VARS.put("user_age", String.valueOf(event.getSender().getAge()));
-        VARS.put("user_nickname", String.valueOf(event.getSender().getNickname()));
+        Map<String, String> variables = new HashMap<>();
+        variables.put("user_id", event.getSender().getUserId());//初始化变量列表
+        variables.put("group_id", String.valueOf(event.getGroupId()));
+        variables.put("user_age", String.valueOf(event.getSender().getAge()));
+        variables.put("user_nickname", String.valueOf(event.getSender().getNickname()));
 
-        String cmdStart = cmd.split(" ")[0];//部分指令头
+        String trimmedCmd = cmd.trim();
+        if (trimmedCmd.isEmpty()) return null;
+        String cmdStart = trimmedCmd.split("\\s+", 2)[0];//部分指令头
 
         if (cmdStart.isEmpty()) return null;
 
         Cmd selectCmd = null;
-        boolean useCmd = false;
-
         for (Cmd cmd2 : CmdHandler.cmds.values()){//将含有昵称的指令替换为源命令
-            if (cmd2.getId().equals(cmdStart) || cmd2.getCmd().contains(cmdStart)) {
-                useCmd = true;//如果部分指令头等于id / 源命令包含部分指令头，则可以视为使用该源命令
-            } else {
-                for (String alies : cmd2.getAlies()){
-                    if (cmd.contains(alies)) {
-                        useCmd = true;//如果指令包含该Cmd中的任意一个alie，则可以视为使用该源命令
-                        break;//跳出循环
-                    }
-                }
-            }
-            if (useCmd) {
+            if (cmd2.getCmd() == null || cmd2.getCmd().isBlank()) continue;
+            String sourceCmd = cmd2.getCmd().trim().split("\\s+", 2)[0];
+            if (cmd2.getId().equals(cmdStart) || sourceCmd.equals(cmdStart) || cmd2.getAlies() != null && cmd2.getAlies().contains(cmdStart)) {
                 selectCmd = cmd2;
                 break;//跳出循环
             }
         }
 
         if (selectCmd != null) {
-            String innerParse = innerVarParse(selectCmd.getCmd(), VARS);
-            List<String> cmdSplits = new ArrayList<>(Arrays.asList(cmd.split(" ")));//拆分命令
-            if (cmdSplits.size() > 1) {
-                for (String key : cmdSplits){
-                    if (key.equals(selectCmd.getId())){
-                        cmdSplits.remove(key);
-                    }
-                }
-            }
+            String innerParse = innerVarParse(selectCmd.getCmd(), variables);
+            List<String> cmdSplits = new ArrayList<>(Arrays.asList(trimmedCmd.split("\\s+")));//拆分命令
+            cmdSplits.remove(0);//移除命令名或别名，只保留参数
             String outerParse = outerVarParse(innerParse, cmdSplits);
             //拼接回命令
             return new Cmd(selectCmd.getId(), outerParse, selectCmd.getAlies(), selectCmd.getAllow_members(), selectCmd.getPermission(), selectCmd.getAfter_cmds(), selectCmd.getAnswer(), selectCmd.isEnable());
@@ -128,13 +98,18 @@ public class CmdUtils {
             char currentChar = command.charAt(i);
 
             if (currentChar == '%') {
-                    // 如果已经在一个占位符中，替换为指定的值
-                    if (valueIndex < values.size()) {
+                if (valueIndex < values.size()) {
+                    boolean lastPlaceholder = command.indexOf('%', i + 1) < 0;
+                    if (lastPlaceholder) {
+                        result.append(String.join(" ", values.subList(valueIndex, values.size())));
+                        valueIndex = values.size();
+                    } else {
                         result.append(values.get(valueIndex));
                         valueIndex++;
                     }
+                }
             } else {
-                    result.append(currentChar);
+                result.append(currentChar);
             }
         }
         return result.toString();

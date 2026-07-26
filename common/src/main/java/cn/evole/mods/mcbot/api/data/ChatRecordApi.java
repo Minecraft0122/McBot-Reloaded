@@ -23,7 +23,7 @@ public class ChatRecordApi {
     }
 
     public static void add(String message_id, String group_name, String qq_id, String message){
-        if (!has(qq_id)) chatRecords.put(qq_id, new ChatRecord(message_id, System.currentTimeMillis(), qq_id, group_name, message));
+        if (!has(message_id)) chatRecords.put(message_id, new ChatRecord(message_id, System.currentTimeMillis(), qq_id, group_name, message));
     }
     public static void del(String message_id){
         if (has(message_id)) chatRecords.remove(message_id);

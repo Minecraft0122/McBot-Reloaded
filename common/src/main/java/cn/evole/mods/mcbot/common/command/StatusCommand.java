@@ -2,6 +2,7 @@ package cn.evole.mods.mcbot.common.command;
 
 
 import cn.evole.mods.mcbot.Constants;
+import cn.evole.mods.mcbot.api.connect.ConnectApi;
 import cn.evole.mods.mcbot.common.config.ModConfig;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -28,33 +29,37 @@ public class StatusCommand {
 
         val groupId = ModConfig.get().getCommon().getGroupIdList().getValue().toString();
         boolean debuggable = ModConfig.get().getCommon().getDebug().getValue();
-        boolean connected = Constants.onebot.getWs().isOpen();
+        boolean connected = ConnectApi.isConnected();
         boolean white = Constants.SERVER.getPlayerList().isUsingWhitelist();
         String host = ModConfig.get().getBotConfig().getUrl().getValue();
         String QQid = ModConfig.get().getBotConfig().getBotId().getValue();
         String toSend =
-                "\n姬妻人服务状态:\n"
-                        + "姬妻人QQId:" + QQid + " \n"
-                        + "框架服务器:" + host + " \n"
-                        + "WebSocket连接状态:" + connected + "\n"
-                        + "互通的群号:" + groupId + "\n"
-                        + "全局服务状态:" + clientEnabled + "\n"
-                        + "开发者模式状态:" + debuggable + "\n"
-                        + "白名单是否开启:" + white + "\n"
+                "\n机器人服务状态：\n"
+                        + "机器人 QQ 号：" + QQid + " \n"
+                        + "框架地址：" + host + " \n"
+                        + "WebSocket 连接：" + state(connected) + "\n"
+                        + "互通群号：" + groupId + "\n"
+                        + "全局服务：" + state(clientEnabled) + "\n"
+                        + "调试模式：" + state(debuggable) + "\n"
+                        + "服务器白名单：" + state(white) + "\n"
                         + "*************************************\n"
-                        + "全局接收消息状态:" + receiveEnabled + "\n"
-                        + "接收QQ群聊天消息状态:" + rChatEnabled + "\n"
-                        + "接收QQ群命令消息状态:" + rCmdEnabled + "\n"
+                        + "接收消息：" + state(receiveEnabled) + "\n"
+                        + "接收 QQ 群聊天：" + state(rChatEnabled) + "\n"
+                        + "接收 QQ 群命令：" + state(rCmdEnabled) + "\n"
                         + "*************************************\n"
-                        + "全局发送消息状态:" + sendEnabled + "\n"
-                        + "发送玩家加入消息状态:" + sJoinEnabled + "\n"
-                        + "发送玩家离开消息状态:" + sLeaveEnabled + "\n"
-                        + "发送玩家死亡消息状态:" + sDeathEnabled + "\n"
-                        + "发送玩家成就消息状态:" + sAchievementsEnabled + "\n"
-                        + "发送群成员进群消息状态:" + sQqWelcomeEnabled + "\n"
-                        + "发送群成员退群消息状态:" + sQqLeaveEnabled + "\n";
+                        + "发送消息：" + state(sendEnabled) + "\n"
+                        + "发送玩家加入消息：" + state(sJoinEnabled) + "\n"
+                        + "发送玩家离开消息：" + state(sLeaveEnabled) + "\n"
+                        + "发送玩家死亡消息：" + state(sDeathEnabled) + "\n"
+                        + "发送玩家进度消息：" + state(sAchievementsEnabled) + "\n"
+                        + "发送群成员入群消息：" + state(sQqWelcomeEnabled) + "\n"
+                        + "发送群成员退群消息：" + state(sQqLeaveEnabled) + "\n";
         context.getSource().sendSuccess(() -> Component.literal(toSend), true);
         
         return 1;
+    }
+
+    private static String state(boolean enabled) {
+        return enabled ? "已开启" : "已关闭";
     }
 }

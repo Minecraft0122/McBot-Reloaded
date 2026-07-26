@@ -1,139 +1,107 @@
-<p align="center">
-    <img width="300" src="https://s2.loli.net/2022/10/02/zrebhtAKjc3GyIl.png" alt="title">  
-</p>
-<div align="center">
+# McBot Reloaded
 
-# McBot
+McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot-11) 协议的 Minecraft 服务端模组，用于在 Minecraft 服务器与 QQ 群之间转发消息，并允许群成员查询服务器状态或执行获准的自定义命令。
 
-_✨ 基于 [OneBot](https://github.com/howmanybots/onebot/blob/master/README.md) 协议的 我的世界 QQ机器人✨_
+本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。项目基于 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot) 继续维护。
 
-</div>
-<hr>
-<p align="center">
-    <a href="https://github.com/Nova-Committee/McBot/issues"><img src="https://img.shields.io/github/issues/Nova-Committee/McBot?style=flat" alt="issues" /></a>
-    <a href="https://www.curseforge.com/minecraft/mc-mods/botconnect">
-        <img src="http://cf.way2muchnoise.eu/botconnect.svg" alt="CurseForge Download">
-    </a>
-    <img src="https://img.shields.io/badge/license-GPLV3-green" alt="License">
-    <a href="https://github.com/howmanybots/onebot"><img src="https://img.shields.io/badge/OneBot-v11-blue?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAIVBMVEUAAAAAAAADAwMHBwceHh4UFBQNDQ0ZGRkoKCgvLy8iIiLWSdWYAAAAAXRSTlMAQObYZgAAAQVJREFUSMftlM0RgjAQhV+0ATYK6i1Xb+iMd0qgBEqgBEuwBOxU2QDKsjvojQPvkJ/ZL5sXkgWrFirK4MibYUdE3OR2nEpuKz1/q8CdNxNQgthZCXYVLjyoDQftaKuniHHWRnPh2GCUetR2/9HsMAXyUT4/3UHwtQT2AggSCGKeSAsFnxBIOuAggdh3AKTL7pDuCyABcMb0aQP7aM4AnAbc/wHwA5D2wDHTTe56gIIOUA/4YYV2e1sg713PXdZJAuncdZMAGkAukU9OAn40O849+0ornPwT93rphWF0mgAbauUrEOthlX8Zu7P5A6kZyKCJy75hhw1Mgr9RAUvX7A3csGqZegEdniCx30c3agAAAABJRU5ErkJggg=="></a>  
-    <a href="https://github.com/Nova-Committee/McBot/actions/workflows/fabric.yml"><img src="https://github.com/Nova-Committee/McBot/actions/workflows/fabric.yml/badge.svg"></a>  
-</p>  
+## 功能
 
+- 在 QQ 群与 Minecraft 服务器之间双向转发聊天消息。
+- 转发玩家加入、离开、死亡和取得进度等服务器事件。
+- 支持群名片、消息前缀、图片占位和多个互通群。
+- 支持自定义群命令、权限控制、玩家绑定和聊天记录。
+- 提供游戏内配置界面与简体中文配置说明。
 
+## 兼容性
 
+| 项目 | 支持范围 | 项目构建基准 |
+| --- | --- | --- |
+| Minecraft | **仅 1.20.1** | 1.20.1 |
+| Java | 正式支持 Java 17 | CI 使用 Temurin 17，字节码目标为 Java 17 |
+| Fabric Loader | 0.16.9 或更高版本 | 0.16.9 |
+| Fabric API | 适用于 1.20.1 的 0.92.2 或更高版本 | 0.92.2+1.20.1 |
+| Forge | 47.3.12 至 47.x | 47.3.12 |
+| OneBot | OneBot 11 正向 WebSocket | OneBot Client 0.4.3 |
 
-<p align="center">
-    <a href="README_EN.md">English</a> | 
-    <a href="https://github.com/Nova-Committee/McBot#%E9%95%BF%E6%9C%9F%E6%94%AF%E6%8C%81%E7%89%88%E6%9C%AC">长期支持版本</a> |
-    <a href="https://github.com/Nova-Committee/McBot#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B">快速开始</a>
-</p>
+本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。Jupiter 配置库和 OneBot Client 已打包进模组，用户无需单独安装。Fabric 环境必须安装 Fabric API；Mod Menu 7.2.2 或更高版本是可选依赖。
 
-# 长期支持版本
+这是服务端模组：专用服务器的普通玩家客户端无需安装。若在客户端或单人游戏中安装，模组仍可加载，并可通过 Mod Menu 使用配置界面。
 
-> Forge 1.16.5/1.18.2/1.19.2/1.20.1/1.21  
-> Fabric 1.16.5/1.18.2/1.19.2/1.20.1/1.21
+OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQQ](https://github.com/NapNeko/NapCatQQ) 或 [Lagrange.Core](https://github.com/LagrangeDev/Lagrange.Core)。具体实现版本更新独立于本模组，因此以 OneBot 11 协议兼容性为准。
 
-# 快速开始
+## 安装与连接
 
-### 使用api进行请求
+1. 安装与服务端加载器匹配的 McBot、Fabric API（仅 Fabric 需要）及其依赖。
+2. 启动一次服务器，使模组生成 `mcbot/config.json` 和 `mcbot/cmds/`。
+3. 在 OneBot 实现中启用正向 WebSocket，并记下地址、端口和访问令牌。
+4. 修改 `mcbot/config.json` 中的机器人地址、QQ 号、令牌和互通群号，或在游戏内使用 `/mcbot` 命令配置。
+5. 执行 `/mcbot connect`。若未启用自动连接，也可执行 `/mcbot connect <主机:端口>`。
 
-```java
-public class APIDemo {
-    static {
-        // 事件回调
-        McBotEvents.ON_CHAT.register((player, msgId, msg) -> System.out.printf("McBot刚刚转发一条消息。由%s发送了%s (%s)%n", player.getName().getString(), msg, msgId));
-    }
+默认 WebSocket 地址为 `127.0.0.1:18082`。地址可带或不带 `ws://` 前缀；模组会自动补全。
 
-    /**
-     * 群里发送消息
-     * @param groupId 群号
-     * @param message 消息
-     */
-    public static void doSend(long groupId, String message) throws CommandSyntaxException {
-        Const.sendGroupMsg(groupId, message)
-    }
+## 常用命令
 
-    /**
-     * 撤回消息
-     * @param message_id 消息ID
-     */
-    public static void recallMessage(int message_id) {
-        JsonObject json = new Gson().fromJson(
-                String.format("{'message_id': %s}", message_id),
-                JsonObject.class);
-        Const.customRequest(ActionType.DELETE_MSG, json);
-    }
-}
+| 命令 | 说明 |
+| --- | --- |
+| `/mcbot connect [主机:端口]` | 连接机器人框架 |
+| `/mcbot disconnect` | 断开 WebSocket 连接 |
+| `/mcbot addGroup <群号>` | 添加互通 QQ 群 |
+| `/mcbot delGroup <群号>` | 删除互通 QQ 群 |
+| `/mcbot setBot <QQ号>` | 设置机器人 QQ 号 |
+| `/mcbot setAuthKey <令牌>` | 设置访问令牌 |
+| `/mcbot receive <all\|chat\|cmd> <true\|false>` | 控制接收内容 |
+| `/mcbot send <类型> <true\|false>` | 控制事件转发 |
+| `/mcbot status` | 查看当前连接与功能状态 |
+| `/mcbot customs` | 列出已加载的自定义命令 |
+| `/mcbot reload` | 重新加载配置 |
+
+所有管理命令都要求 2 级权限（管理员或命令方块级别）。
+
+## 自定义群命令
+
+自定义命令存放在 `mcbot/cmds/`。首次启动会生成 `list.json`、`say.json`、`bind.json` 和 `unbind.json` 示例。可用变量包括：
+
+- `%group_id%`：来源群号
+- `%user_id%`：发送者 QQ 号
+- `%user_age%`：发送者年龄（由 OneBot 提供）
+- `%user_nickname%`：发送者昵称
+- 单独的 `%`：按顺序替换为群命令参数
+
+修改自定义命令后重启服务器，以确保命令文件被完整重新加载。
+
+## 中文支持
+
+简体中文是默认语言。`mcbot/config.json` 中的 `languageSelect` 可设为 `zh_cn`、`zh_tw`、`zh_hk` 或 `en_us`。游戏内配置界面的简体中文文本位于 `common/src/main/resources/assets/mcbot/lang/zh_cn.json`，事件和死亡消息文本位于 `common/src/main/resources/lang/zh_cn.json`。
+
+## 构建
+
+```bash
+./gradlew clean build
 ```
 
-### 事件监听示例
+Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/build/libs/` 和 `forge/build/libs/`。
 
-```java
-public class WebSocketServerTest {
-    public static void main(String[] args) throws Exception {
-        public static LinkedBlockingQueue<String> blockingQueue = new LinkedBlockingQueue<>();//使用队列传输数据
-        public static Thread app = new Thread(() -> {
-            service = new ConnectFactory(new BotConfig(), blockingQueue);//创建websocket连接
-            bot = service.ws.createBot();//创建机器人实例
-        }, "BotServer");
-        app.start();
-        EventBus bus = new EventBus(blockingQueue);//创建事件分发器
-        GroupMessageListener groupMessageListener = new GroupMessageListener();
-        groupMessageListener.addHandler("天气", new Handler<GroupMessageEvent>() {
-            @Override
-            public void handle(GroupMessageEvent groupMessage) {
-                System.out.println(groupMessage);
+## 自动发布
 
-            }
-        });
-        bus.addListener(groupMessageListener);//加入监听
-        bus.addListener(new SimpleListener<PrivateMessageEvent>() {//私聊监听
-            @Override
-            public void onMessage(PrivateMessageEvent privateMessage) {
-                System.out.println(privateMessage);
-            }
-        });
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致的标签即可自动发布。例如 `mod_version=2.3.1` 时：
 
-    }
-}
+```bash
+git tag v2.3.1
+git push origin v2.3.1
 ```
 
-# 支持
+自动发布会在干净环境中运行全部测试，构建 Fabric 与 Forge 正式 JAR，生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
 
-McBot 以 [OneBot-v11](https://github.com/howmanybots/onebot/tree/master/v11/specs)
-标准协议进行开发，兼容所有支持正向WebSocket的OneBot协议端
-| 项目地址                                                                              | 核心作者           | 备注                                                                    |
-|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------------|
-| [Overflow](https://github.com/MrXiaoM/Overflow)                                   | MrXiaoM        | 实现 mirai 的无缝迁移                                                        |
-| [Lagrange.Core](https://github.com/LagrangeDev/Lagrange.Core)                     | NepPure        | C#实现 By Konata.Core                                                   |
-| [OpenShamrock](https://github.com/whitechi73/OpenShamrock)                        | whitechi73     | Xposed框架hook实现                                                        |
-| [Gensokyo](https://github.com/Hoshinonyaruko/Gensokyo)                            | Hoshinonyaruko | 基于官方api 轻量 原生跨平台                                                      |
-| [LLOnebot](https://github.com/LLOneBot/LLOneBot)                                  | linyuchen      | 使用[LiteLoaderQQNT](https://github.com/LiteLoaderQQNT/LiteLoaderQQNT)  |
-| [NapCatQQ](https://github.com/NapNeko/NapCatQQ)                                   | MliKiowa | 基于NTQQ的无头Bot框架  |
-| [OneBot-Mirai](https://github.com/cnlimiter/onebot-mirai)                                   | cnlimiter | Mirai的onebot协议实现  |
+## 反馈问题
 
-# Credits
+提交问题前，请附上 Minecraft、Java、加载器和 McBot 版本，并提供完整日志、复现步骤及已脱敏的配置文件：
 
-* [OneBot](https://github.com/botuniverse/onebot)
+- [本项目问题列表](https://github.com/Minecraft0122/McBot-Reloaded/issues)
+- [上游问题列表](https://github.com/Nova-Committee/McBot/issues)
+- [上游开放问题梳理](UPSTREAM_ISSUES.md)
 
-# 开源许可
+## 致谢与许可
 
-This product is licensed under the GNU General Public License version 3. The license is as published by the Free
-Software Foundation published at https://www.gnu.org/licenses/gpl-3.0.html.
+感谢 McBot 原作者与所有贡献者，以及 OneBot、Fabric、Forge、Architectury 和 Jupiter 等项目。
 
-Alternatively, this product is licensed under the GNU Lesser General Public License version 3 for non-commercial use.
-The license is as published by the Free Software Foundation published at https://www.gnu.org/licenses/lgpl-3.0.html.
-
-Feel free to contact us if you have any questions about licensing or want to use the library in a commercial closed
-source product.
-
-# 致谢
-
-Thanks to [JetBrains](https://www.jetbrains.com/?from=mcbot) for allocating free open-source licences for IDEs such as [IntelliJ IDEA](https://www.jetbrains.com/idea/?from=mcbot)
-[<img src=".github/jetbrains-variant-3.png" width="200"/>](https://www.jetbrains.com/?from=mcbot)
-
-## 星星（要要）~⭐
-
-[![Stargazers over time](https://starchart.cc/Nova-Committee/McBot.svg)](https://starchart.cc/Nova-Committee/McBot)
-
-
+本项目依据 [GNU GPL 3.0 或更高版本](LICENSE)发布。

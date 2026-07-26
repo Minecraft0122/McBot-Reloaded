@@ -6,6 +6,7 @@ import cn.evole.mods.mcbot.api.event.server.ServerGameEvents;
 import cn.evole.mods.mcbot.common.event.ICmdEvent;
 import cn.evole.mods.mcbot.common.event.ITickEvent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -17,14 +18,17 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.NotNull;
 
 @Mod(Constants.MOD_ID)
 @Mod.EventBusSubscriber
 public class McBotForge {
-    public McBotForge() {
+    public McBotForge(FMLJavaModLoadingContext context) {
         McBot.init();
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> McBotForgeClient.register(context));
     }
 
     @SubscribeEvent

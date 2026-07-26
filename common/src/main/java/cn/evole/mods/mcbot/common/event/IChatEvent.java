@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public class IChatEvent {
     public static void register(ServerPlayer player, String message) {
-        val split = message.split(" ");
+        val split = message.split(" ", 2);
         if (
                 ModConfig.get().getStatus().getSChatEnable().getValue()
                         && ModConfig.get().getStatus().getSEnable().getValue()
@@ -26,6 +26,7 @@ public class IChatEvent {
                             : "<%s> %s",
                     player.getDisplayName().getString(),
                     ModConfig.get().getCmd().getMcChatPrefixOn().getValue()
+                            && split.length == 2
                             && ModConfig.get().getCmd().getMcChatPrefix().getValue().equals(split[0]) ? split[1] : message);
 
             BotApi.sendAllGroupMsg(() -> MsgUtils.builder().text(msg).build(), player);
