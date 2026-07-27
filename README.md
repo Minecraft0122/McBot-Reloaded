@@ -4,6 +4,16 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 
 本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。项目基于 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot) 继续维护。
 
+## 下载
+
+请从 [GitHub Releases 最新版本](https://github.com/Minecraft0122/McBot-Reloaded/releases/latest)下载，不要使用页面上由 GitHub 自动生成的 `Source code` 压缩包。
+
+- Fabric 服务端下载文件名以 `-fabric.jar` 结尾，并另外安装 Fabric API。
+- Forge 服务端下载文件名以 `-forge.jar` 结尾，不要与 Fabric 版本同时安装。
+- 可使用同一 Release 中的 `SHA256SUMS.txt` 核对文件完整性。
+
+将对应 JAR 放入服务端的 `mods` 目录即可。Jupiter 配置库和 OneBot Client 已内置，普通玩家客户端无需安装 McBot。
+
 ## 功能
 
 - 在 QQ 群与 Minecraft 服务器之间双向转发聊天消息。

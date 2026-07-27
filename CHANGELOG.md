@@ -2,7 +2,7 @@
 
 本文件记录 McBot 的重要变更。历史内容整理自上游提交记录。
 
-## 未发布
+## [2.3.1](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/v2.3.1) - 2026-07-27
 
 ### 修复
 
