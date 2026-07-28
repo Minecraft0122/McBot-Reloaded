@@ -1,7 +1,13 @@
 package cn.evolvefield.onebot.sdk.util.json;
 
+import cn.evolvefield.onebot.sdk.event.message.MessageEvent;
+import cn.evolvefield.onebot.sdk.util.BotUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -70,7 +76,54 @@ public class GsonUtil {
      * @return
      */
     public static <T> T strToJavaBean(String json, Class<T> classOfT) {
-        return GSON.fromJson(json, classOfT);
+        return GSON.fromJson(normalizeMessage(json, classOfT), classOfT);
+    }
+
+    /**
+     * OneBot 11 允许 message 使用 CQ 字符串或消息段数组。旧版事件模型使用
+     * String 字段，因此在反序列化前把数组无损转换为 CQ 字符串。
+     */
+    private static String normalizeMessage(String json, Class<?> classOfT) {
+        if (!MessageEvent.class.isAssignableFrom(classOfT)) return json;
+
+        JsonElement rootElement = new JsonParser().parse(json);
+        if (!rootElement.isJsonObject()) return json;
+        JsonObject root = rootElement.getAsJsonObject();
+        JsonElement message = root.get("message");
+        if (message == null || !message.isJsonArray()) return json;
+
+        root.addProperty("message", arrayMessageToCode(message.getAsJsonArray()));
+        return root.toString();
+    }
+
+    private static String arrayMessageToCode(JsonArray segments) {
+        StringBuilder result = new StringBuilder();
+        for (JsonElement segmentElement : segments) {
+            if (!segmentElement.isJsonObject()) continue;
+            JsonObject segment = segmentElement.getAsJsonObject();
+            JsonElement typeElement = segment.get("type");
+            JsonElement dataElement = segment.get("data");
+            if (typeElement == null || dataElement == null || !dataElement.isJsonObject()) continue;
+
+            String type = typeElement.getAsString();
+            JsonObject data = dataElement.getAsJsonObject();
+            if ("text".equals(type)) {
+                JsonElement text = data.get("text");
+                if (text != null && !text.isJsonNull()) {
+                    result.append(BotUtils.escape2(text.getAsString()));
+                }
+                continue;
+            }
+
+            result.append("[CQ:").append(type);
+            for (Map.Entry<String, JsonElement> entry : data.entrySet()) {
+                if (entry.getValue() == null || entry.getValue().isJsonNull()) continue;
+                result.append(',').append(entry.getKey()).append('=')
+                        .append(BotUtils.escape(entry.getValue().getAsString()));
+            }
+            result.append(']');
+        }
+        return result.toString();
     }
 
     /**

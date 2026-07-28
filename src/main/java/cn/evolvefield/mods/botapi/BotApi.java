@@ -72,8 +72,8 @@ public class BotApi {
     public void onServerStopping(FMLServerStoppingEvent event){
         Const.isShutdown = true;
         Const.LOGGER.info("▌ §c正在关闭群服互联 §a┈━═☆");
-        dispatchers.stop();//分发器关闭
-        service.stop();
+        if (dispatchers != null) dispatchers.stop();//分发器关闭
+        if (service != null) service.stop();
         app.shutdownNow();
 
     }
@@ -82,7 +82,7 @@ public class BotApi {
         try {
             ConfigHandler.save();//保存配置
             CustomCmdHandler.INSTANCE.clear();//自定义命令持久层清空
-            ConfigHandler.watcher.get().close();//配置监控关闭
+            if (ConfigHandler.watcher.get() != null) ConfigHandler.watcher.get().close();//配置监控关闭
             BotApi.configWatcherExecutorService.shutdownNow();//监控进程关闭
         } catch (Exception e) {
             e.printStackTrace();

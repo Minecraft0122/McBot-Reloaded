@@ -10,9 +10,20 @@ public class RemoveGroupIDCommand {
 
 
     public static void execute(ICommandSender sender, String[] args) throws CommandException {
-        val id = Long.getLong(args[1]);
+        if (args.length < 2) {
+            sender.addChatMessage(new ChatComponentText("用法：/mcbot removeGroup <QQ群号>"));
+            return;
+        }
+        final long id;
+        try {
+            id = Long.parseLong(args[1]);
+        } catch (NumberFormatException e) {
+            sender.addChatMessage(new ChatComponentText("QQ群号必须是十进制数字。"));
+            return;
+        }
         if (ConfigHandler.cached().getCommon().getGroupIdList().contains(id)) {
             ConfigHandler.cached().getCommon().removeGroupId(id);
+            sender.addChatMessage(new ChatComponentText("已删除QQ群号:" + id + "！"));
         } else {
             sender.addChatMessage(new ChatComponentText("QQ群号:" + id + "并未出现！"));
         }

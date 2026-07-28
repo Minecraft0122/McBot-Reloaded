@@ -5,13 +5,12 @@ import cn.evolvefield.mods.botapi.BotApi;
 import cn.evolvefield.mods.botapi.Const;
 import cn.evolvefield.mods.botapi.init.handler.ConfigHandler;
 import cn.evolvefield.onebot.client.connection.ConnectFactory;
+import cn.evolvefield.onebot.client.config.BotConfig;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import lombok.val;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
-
-import java.util.regex.Pattern;
 
 public class ConnectCommand {
 
@@ -19,10 +18,8 @@ public class ConnectCommand {
         val parameter = args[2];
 
 
-        val pattern = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
-        val matcher = pattern.matcher(parameter);
-        if (matcher.find()) {
-            ConfigHandler.cached().getBotConfig().setUrl("ws://" + parameter);
+        try {
+            ConfigHandler.cached().getBotConfig().setUrl(BotConfig.normalizeWebSocketUrl(parameter));
             sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "cqhttp"));
             ConfigHandler.cached().getBotConfig().setMiraiHttp(false);
 
@@ -39,18 +36,16 @@ public class ConnectCommand {
 
 
 
-        } else {
-            sender.addChatMessage(new ChatComponentText(ChatFormatting.RED + "参数错误❌"));
+        } catch (IllegalArgumentException e) {
+            sender.addChatMessage(new ChatComponentText(ChatFormatting.RED + e.getMessage()));
         }
     }
 
     public static void miraiExecute(ICommandSender sender, String[] args) throws CommandException {
         val parameter = args[2];
 
-        val pattern = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
-        val matcher = pattern.matcher(parameter);
-        if (matcher.find()) {
-            ConfigHandler.cached().getBotConfig().setUrl("ws://" + parameter);
+        try {
+            ConfigHandler.cached().getBotConfig().setUrl(BotConfig.normalizeWebSocketUrl(parameter));
             sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "mirai"));
             ConfigHandler.cached().getBotConfig().setMiraiHttp(true);
             try {
@@ -66,8 +61,8 @@ public class ConnectCommand {
 
 
 
-        } else {
-            sender.addChatMessage(new ChatComponentText(ChatFormatting.RED + "参数错误"));
+        } catch (IllegalArgumentException e) {
+            sender.addChatMessage(new ChatComponentText(ChatFormatting.RED + e.getMessage()));
         }
     }
 

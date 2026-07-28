@@ -15,6 +15,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Project: onebot-client
@@ -113,7 +114,10 @@ public class EventBus implements Runnable {
      */
     protected String getTask() {
         try {
-            return this.queue.poll();
+            return this.queue.poll(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getMessage());

@@ -45,7 +45,7 @@ public class ConnectFactory {
         StringBuilder builder = new StringBuilder();
         WSClient ws = null;
         if (config.isMiraiHttp()){
-            builder.append(config.getUrl());
+            builder.append(BotConfig.normalizeWebSocketUrl(config.getUrl()));
             builder.append("/all");
             builder.append("?verifyKey=");
             if (config.isAccessToken()) {
@@ -55,7 +55,7 @@ public class ConnectFactory {
             builder.append(config.getBotId());
         }
         else {
-            builder.append(config.getUrl());
+            builder.append(BotConfig.normalizeWebSocketUrl(config.getUrl()));
             if (config.isAccessToken()) {
                 builder.append("?access_token=");
                 builder.append(config.getToken());
@@ -72,7 +72,7 @@ public class ConnectFactory {
     }
 
     public void stop(){
-        ws.close();
+        if (ws != null) ws.close();
     }
 
 

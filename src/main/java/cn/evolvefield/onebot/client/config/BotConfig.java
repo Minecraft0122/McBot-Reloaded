@@ -36,4 +36,17 @@ public class BotConfig {
     public BotConfig(String url, long botId){
         this(url, "", botId, false, true, true, 20);
     }
+
+    public static String normalizeWebSocketUrl(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("OneBot WebSocket 地址不能为空");
+        }
+        String url = value.trim();
+        if (url.regionMatches(true, 0, "wss://", 0, 6)) return "wss://" + url.substring(6);
+        if (url.regionMatches(true, 0, "ws://", 0, 5)) return "ws://" + url.substring(5);
+        if (url.matches("^[A-Za-z][A-Za-z0-9+.-]*://.*$")) {
+            throw new IllegalArgumentException("OneBot 地址只支持 ws:// 或 wss:// 协议");
+        }
+        return "ws://" + url;
+    }
 }

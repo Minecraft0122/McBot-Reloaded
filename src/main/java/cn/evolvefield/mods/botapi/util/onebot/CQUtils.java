@@ -29,61 +29,39 @@ public class CQUtils {
     }
 
     public static String replace(String msg) {
-        if (msg.indexOf('[') == -1)
-            return BotUtils.unescape(msg);
-        String message = "";
+        if (msg == null || msg.isEmpty()) return "";
+        StringBuilder message = new StringBuilder();
         val matcher = RegexUtils.regexMatcher(CQ_CODE_REGEX, msg);
+        int previousEnd = 0;
         while (matcher.find()) {
-            val type = matcher.group(1);
-            switch (type) {
-                case "image": {
-                    if (ConfigHandler.cached().getCommon().isImageOn()) {
-                        val url = Arrays.stream(matcher.group(2).split(","))//具体数据分割
-                                .filter(it -> it.startsWith("url"))//非空判断
-                                .map(it -> it.substring(it.indexOf('=')) + 1)
-                                .findFirst();
-                        if (url.isPresent()) {
-                            message = matcher.replaceAll(String.format("[[CICode,url=%s,name=来自QQ的图片]]", url.get()));
-                        } else {
-                            message = matcher.replaceAll("[图片]");
-                        }
-                    } else
-                        message = matcher.replaceAll("[图片]");
-                    break;
-                }
-                case "reply":
-                    message = matcher.replaceAll("[回复]");
-                    break;
-                case "at":
-                    message = matcher.replaceAll("[[@]]");
-                    break;
-                case "record":
-                    message = matcher.replaceAll("[语音]");
-                    break;
-                case "forward":
-                    message = matcher.replaceAll("[合并转发]");
-                    break;
-                case "video":
-                    message = matcher.replaceAll("[视频]");
-                    break;
-                case "music":
-                    message = matcher.replaceAll("[音乐]");
-                    break;
-                case "redbag":
-                    message = matcher.replaceAll("[红包]");
-                    break;
-                case "poke":
-                    message = matcher.replaceAll("[戳一戳]");
-                    break;
-                case "face":
-                    message = matcher.replaceAll("[表情]");
-                    break;
-                default:
-                    message = matcher.replaceAll("[?]");
-                    break;
-            }
+            message.append(BotUtils.unescape(msg.substring(previousEnd, matcher.start())));
+            message.append(replacement(matcher.group(1), matcher.group(2)));
+            previousEnd = matcher.end();
         }
+        message.append(BotUtils.unescape(msg.substring(previousEnd)));
+        return message.toString();
+    }
 
-        return BotUtils.unescape(message);
+    private static String replacement(String type, String arguments) {
+        if ("image".equals(type)) {
+            if (!ConfigHandler.cached().getCommon().isImageOn()) return "[图片]";
+            val url = Arrays.stream(arguments.split(","))
+                    .filter(it -> it.startsWith("url="))
+                    .map(it -> BotUtils.unescape(it.substring(it.indexOf('=') + 1)))
+                    .findFirst();
+            return url.isPresent()
+                    ? String.format("[[CICode,url=%s,name=来自QQ的图片]]", url.get())
+                    : "[图片]";
+        }
+        if ("reply".equals(type)) return "[回复]";
+        if ("at".equals(type)) return "[@]";
+        if ("record".equals(type)) return "[语音]";
+        if ("forward".equals(type)) return "[合并转发]";
+        if ("video".equals(type)) return "[视频]";
+        if ("music".equals(type)) return "[音乐]";
+        if ("redbag".equals(type)) return "[红包]";
+        if ("poke".equals(type)) return "[戳一戳]";
+        if ("face".equals(type)) return "[表情]";
+        return "[?]";
     }
 }
