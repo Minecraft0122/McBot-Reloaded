@@ -3,6 +3,7 @@ package cn.evole.mods.mcbot.api.bot;
 import cn.evole.mods.mcbot.common.config.ModConfig;
 import cn.evole.mods.mcbot.common.event.ITickEvent;
 import cn.evole.mods.mcbot.util.MsgThreadUtils;
+import cn.evole.mods.mcbot.util.MinecraftTextUtils;
 import cn.evole.onebot.sdk.action.misc.ActionPath;
 import com.google.gson.JsonObject;
 import lombok.val;
@@ -34,7 +35,8 @@ public class BotApi {
      * 发送来自服务器命令的纯文本，防止健康报告被误解析成 CQ 码。
      */
     public static void sendGroupText(long groupId, String message) {
-        for (String part : splitGroupText(message, MAX_GROUP_TEXT_LENGTH)) {
+        String cleanMessage = MinecraftTextUtils.sanitizeForOneBot(message);
+        for (String part : splitGroupText(cleanMessage, MAX_GROUP_TEXT_LENGTH)) {
             MsgThreadUtils.INSTANCE.submit(groupId, part, true);
         }
     }

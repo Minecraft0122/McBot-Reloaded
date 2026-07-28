@@ -28,6 +28,7 @@ public class CmdApi {
         val cmd = CmdUtils.varParse(event, originCmd);
 
         if (cmd == null) return;
+        Constants.LOGGER.info("QQ群 {} 的用户 {} 执行 McBot 命令：{}", group_id, user_id, cmd.getId());
 
         if (CmdUtils.groupAdminParse(event)) {
             runAndReply(event.getGroupId(), cmd);
@@ -59,6 +60,8 @@ public class CmdApi {
                 && !"NO".equalsIgnoreCase(cmd.getAnswer())) {
             response = cmd.getAnswer();
         }
+        Constants.LOGGER.info("McBot 命令 {} 执行完成，返回 {} 个字符。",
+                cmd.getId(), response == null ? 0 : response.length());
         BotApi.sendGroupText(groupId, response);
     }
 }
