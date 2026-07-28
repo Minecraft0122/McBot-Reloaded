@@ -1,0 +1,38 @@
+name: '旧版 Forge 构建巡检'
+
+on:
+  push:
+    branches: ['forge']
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 3 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: '检出仓库'
+        uses: actions/checkout@v7
+      - name: '配置 JDK 21'
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: '配置 Gradle'
+        uses: gradle/actions/setup-gradle@v6
+      - name: '构建 1.16.5 与 1.19.2 回归目标'
+        working-directory: forge
+        run: chmod +x gradlew && ./gradlew :1.16.5:build :1.19.2:build --no-daemon --stacktrace
+      - name: '上传构建产物'
+        uses: actions/upload-artifact@v7
+        with:
+          name: McBot-Forge-legacy-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            forge/versions/1.16.5/build/libs/*-forge.jar
+            forge/versions/1.19.2/build/libs/*-forge.jar

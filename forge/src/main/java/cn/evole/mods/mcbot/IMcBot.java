@@ -23,7 +23,6 @@ public class IMcBot {
     public static MinecraftServer SERVER = null;
     public static Path CONFIG_FOLDER;
     public static Path CONFIG_FILE;
-    public static Path LIB_FOLDER;
 
     public static OneBotClient onebot;
 
@@ -41,9 +40,6 @@ public class IMcBot {
     public void init() {
         CONFIG_FOLDER = Const.gameDir.resolve("mcbot");
         FileUtil.checkFolder(CONFIG_FOLDER);
-        LIB_FOLDER = CONFIG_FOLDER.resolve("libs");
-        FileUtil.checkFolder(LIB_FOLDER);
-        //LibUtils.create(LIB_FOLDER, "libs.txt").download();//有bug，todo 修复
         CONFIG_FILE = CONFIG_FOLDER.resolve("config.toml");
         I18n.init();
         UserBindApi.load(CONFIG_FOLDER);
@@ -69,15 +65,24 @@ public class IMcBot {
         Const.isShutdown = true;
         Const.LOGGER.info("▌ §c正在关闭群服互联");
         connected = false;
+        if (onebot != null) {
+            try {
+                onebot.close();
+            } catch (RuntimeException e) {
+                Const.LOGGER.warn("关闭 OneBot WebSocket 时发生异常", e);
+            } finally {
+                onebot = null;
+            }
+        }
+        Const.shutdown();//消息线程关闭
+        CQUtils.shutdown();//cq转义线程关闭
         UserBindApi.save(CONFIG_FOLDER);
         ChatRecordApi.save(CONFIG_FOLDER);
         CustomCmdHandler.INSTANCE.clear();//自定义命令持久层清空
     }
 
     public void onServerStopped(MinecraftServer server) {
-        Const.shutdown();//消息线程关闭
-        CQUtils.shutdown();//cq转义线程关闭
-        if (onebot != null) onebot.close();
+        // 连接与线程已在 SERVER_STOPPING 阶段关闭，防止重连线程阻止进程退出。
     }
 
     public void onServerTick(MinecraftServer server) {

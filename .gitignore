@@ -10,3 +10,8 @@
 
 *.DS_Store
 
+# Gradle 与运行目录
+.gradle/
+**/build/
+**/run/
+

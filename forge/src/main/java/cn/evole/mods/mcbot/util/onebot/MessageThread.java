@@ -4,7 +4,7 @@ import cn.evole.mods.mcbot.Const;
 import cn.evole.mods.mcbot.IMcBot;
 import cn.evole.mods.mcbot.McBot;
 import cn.evole.mods.mcbot.api.BotChatEvent;
-import cn.evole.onebot.sdk.action.ActionPath;
+import cn.evole.onebot.sdk.action.misc.ActionPath;
 import com.google.gson.JsonObject;
 import lombok.val;
 import net.minecraft.server.level.ServerPlayer;

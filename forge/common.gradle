@@ -1,20 +1,33 @@
 apply(plugin: "dev.architectury.loom")
 apply(plugin: "maven-publish")
 apply(plugin: "com.replaymod.preprocess")
+apply(plugin: "com.github.johnrengelman.shadow")
 
 int mcVersion = 1
 
 preprocess {
     mcVersion = vars.get().get("MC")
-    tabIndentation.set(false)
 }
 
 
 repositories {
     mavenCentral()
-    maven { url 'https://maven.nova-committee.cn/releases'}
     maven { url 'https://maven.mohistmc.com/' }
+    maven { url 'https://jitpack.io' }
+    ivy {
+        name = 'OneBotGitHubReleases'
+        url = 'https://github.com/cnlimiter/onebot-client/releases/download'
+        patternLayout {
+            artifact 'v[revision]/[artifact]-[revision].[ext]'
+        }
+        metadataSources { artifact() }
+        content { includeModule 'cn.evole.onebot', 'OneBot-Client' }
+    }
 
+}
+
+configurations {
+    shadowBundle
 }
 
 dependencies {
@@ -23,14 +36,13 @@ dependencies {
     forge "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
 
 
-    implementation forgeRuntimeLibrary ("dev.vankka:dependencydownload-runtime:1.3.1") {exclude module: 'jar-relocator'}
-    implementation forgeRuntimeLibrary ("dev.vankka:dependencydownload-common:1.3.1")
-    implementation forgeRuntimeLibrary (include("cn.evole.onebot:OneBot-Client:${onebot_client_version}")){transitive = false}
-    implementation forgeRuntimeLibrary (include("cn.evole.config:AtomConfig-Toml:${toml_version}")){transitive = false}
+    implementation shadowBundle("cn.evole.onebot:OneBot-Client:${onebot_client_version}") {transitive = false}
+    implementation files("${rootDir}/libs/AtomConfig-Toml-0.1.5.jar")
+    shadowBundle files("${rootDir}/libs/AtomConfig-Toml-0.1.5.jar")
 
     if (mcVersion == 11605) include ("org.slf4j:slf4j-api:2.0.7")
-    compileOnly ("org.projectlombok:lombok:1.18.24")
-    annotationProcessor ("org.projectlombok:lombok:1.18.24")
+    compileOnly ("org.projectlombok:lombok:1.18.36")
+    annotationProcessor ("org.projectlombok:lombok:1.18.36")
 
 }
 
@@ -40,6 +52,12 @@ loom {
 
 remapJar {
     remapperIsolation = true
+    inputFile.set(shadowJar.archiveFile)
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = "dev-shadow"
 }
 
 
@@ -56,7 +74,7 @@ buildNeeded.finalizedBy("copyJars")
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-version = project.mod_version
+version = project.mod_version + "-forge"
 group = project.maven_group
 archivesBaseName = project.archives_base_name + "-" + project.minecraft_dependency
 

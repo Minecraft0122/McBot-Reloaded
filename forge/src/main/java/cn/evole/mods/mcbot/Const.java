@@ -5,7 +5,7 @@ import cn.evole.mods.mcbot.core.event.IBotEvent;
 import cn.evole.mods.mcbot.core.event.ITickEvent;
 import cn.evole.mods.mcbot.util.onebot.MessageThread;
 import cn.evole.onebot.client.OneBotClient;
-import cn.evole.onebot.sdk.action.ActionPath;
+import cn.evole.onebot.sdk.action.misc.ActionPath;
 import com.google.gson.JsonObject;
 import lombok.val;
 import net.minecraft.server.level.ServerPlayer;
@@ -105,14 +105,38 @@ public class Const {
     /**
      * WS连接
      */
-    public static void wsConnect(){
-        IMcBot.onebot.close();//关闭线程
-        IMcBot.onebot = null;//强制为null
-        IMcBot.onebot = OneBotClient.create(ModConfig.INSTANCE.getBotConfig().build()).open().registerEvents(new IBotEvent());//重新实例化
-        ModConfig.INSTANCE.getStatus().setREnable(true);
-        ModConfig.INSTANCE.getCommon().setEnable(true);
-        ModConfig.INSTANCE.save();
-        IMcBot.connected = true;
+    public static synchronized void wsConnect(){
+        if (isShutdown) {
+            throw new IllegalStateException("服务器正在关闭，不能建立 OneBot 连接");
+        }
+
+        OneBotClient previous = IMcBot.onebot;
+        IMcBot.onebot = null;
+        IMcBot.connected = false;
+        if (previous != null) {
+            try {
+                previous.close();
+            } catch (RuntimeException e) {
+                LOGGER.warn("关闭旧 OneBot 连接时发生异常", e);
+            }
+        }
+
+        OneBotClient client = OneBotClient.create(ModConfig.INSTANCE.getBotConfig().build());
+        try {
+            client.open().registerEvents(new IBotEvent());
+            IMcBot.onebot = client;
+            ModConfig.INSTANCE.getStatus().setREnable(true);
+            ModConfig.INSTANCE.getCommon().setEnable(true);
+            ModConfig.INSTANCE.save();
+            IMcBot.connected = true;
+        } catch (RuntimeException e) {
+            try {
+                client.close();
+            } catch (RuntimeException closeError) {
+                e.addSuppressed(closeError);
+            }
+            throw e;
+        }
     }
 
 

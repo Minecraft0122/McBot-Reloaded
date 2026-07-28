@@ -1,15 +1,19 @@
 modLoader="javafml"
 loaderVersion="[28,)"
-license="GNU AGPL 3.0"
+license="GPL-3.0-or-later"
+issueTrackerURL="https://github.com/Minecraft0122/McBot-Reloaded/issues"
+
 [[mods]]
     modId="${mod_id}"
     version="${mod_version}"
     displayName="${mod_name}"
-    logoFile= "icon.png"
-    authors="cnlimiter"
+    logoFile="icon.png"
+    authors="cnlimiter, Minecraft0122"
+    displayURL="https://github.com/Minecraft0122/McBot-Reloaded"
     description='''
-    Adds chat linking between QQ and Minecraft and QQ commands to request server data.
+    连接 Minecraft 服务器与 QQ 群，支持双向聊天转发和服务器信息查询命令。
     '''
+
 [[dependencies.${mod_id}]]
     modId="minecraft"
     mandatory=true

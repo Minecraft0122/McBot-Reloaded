@@ -1,6 +1,7 @@
 plugins {
-    id "com.replaymod.preprocess" version "SNAPSHOT"
+    id "com.replaymod.preprocess" version "c2041a34ae"
     id 'dev.architectury.loom' version '1.4-SNAPSHOT' apply false
+    id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id 'maven-publish'
 }
 

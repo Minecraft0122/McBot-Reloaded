@@ -31,10 +31,10 @@ public class KeepAlive {
     }
 
     public void register() {
-        while (true) {
+        while (!Const.isShutdown) {
             val limit = ModConfig.INSTANCE.getBotConfig().getMaxReconnectAttempts();
             if (IMcBot.connected && ModConfig.INSTANCE.getBotConfig().isReconnect() && limit >= 1) {
-                if (IMcBot.onebot.getWs().isClosed()) {  // 当你写完复杂的机制后突然发现有现成的api时 be like
+                if (!Const.isShutdown && IMcBot.onebot != null && IMcBot.onebot.getWs().isClosed()) {
                     reconnect(limit);
                 }
             }
@@ -42,25 +42,32 @@ public class KeepAlive {
                 Thread.sleep(ModConfig.INSTANCE.getBotConfig().getTimeoutCompensation());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                return;
             }
         }
     }
 
     private void reconnect(final int limit) {
         int hasReconnect = 0;
-        while (hasReconnect <= limit) {
+        while (hasReconnect < limit) {
+            if (Const.isShutdown) return;
             Const.LOGGER.info("正在尝试重连...第{}次", hasReconnect + 1);
-            Const.wsConnect();
+            try {
+                Const.wsConnect();
+            } catch (RuntimeException e) {
+                Const.LOGGER.warn("第 {} 次 OneBot 重连失败", hasReconnect + 1, e);
+            }
             try {
                 Thread.sleep(ModConfig.INSTANCE.getBotConfig().getTimeoutCompensation());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
+                return;
             }
-            if (IMcBot.onebot.getWs().isClosed()) hasReconnect++;
-            else return;
+            if (IMcBot.onebot != null && IMcBot.onebot.getWs().isOpen()) return;
+            hasReconnect++;
         }
         Const.sendAllPlayerMsg("▌ " + ChatFormatting.RED + "群服互联意外断开，请联系服务器管理者。");
-        IMcBot.onebot.getWs().close();
+        if (IMcBot.onebot != null) IMcBot.onebot.close();
         IMcBot.connected = false;
     }
 
