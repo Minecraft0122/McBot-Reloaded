@@ -17,7 +17,14 @@ import net.minecraft.server.MinecraftServer;
 import static cn.evole.mods.mcbot.Constants.*;
 
 public class McBot {
-    public static void init() {
+    private static boolean initialized;
+
+    public static synchronized void init() {
+        if (initialized) {
+            LOGGER.debug("McBot 事件已注册，跳过重复初始化。");
+            return;
+        }
+
         try {
             ConfigManager.getInstance().registerConfigHandler(ModConfig.INSTANCE);
             ServerConfigManager.registerServerConfig(ModConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
@@ -30,6 +37,7 @@ public class McBot {
         ServerGameEvents.PLAYER_ADVANCEMENT.register(IPlayerEvent::advancement);
         ServerGameEvents.PLAYER_DEATH.register(IPlayerEvent::death);
         ServerGameEvents.SERVER_CHAT.register(IChatEvent::register);
+        initialized = true;
     }
 
 
@@ -46,7 +54,7 @@ public class McBot {
     public static void onServerStarted(MinecraftServer server) {
         mcBotCommand = new McBotCommandSource(server);
         if (ModConfig.get().getCommon().getAutoOpen().getValue()) {
-            ConnectApi.wsConnect();
+            ConnectApi.wsConnectAsync();
         }
     }
 

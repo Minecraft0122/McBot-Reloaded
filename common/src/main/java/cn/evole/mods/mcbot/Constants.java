@@ -22,6 +22,7 @@ public class Constants {
     public static volatile ExecutorService msgExecutor = Executors.newCachedThreadPool();
     public static volatile ExecutorService cqExecutor = Executors.newSingleThreadExecutor();
     public static volatile ExecutorService commonExecutor = Executors.newFixedThreadPool(4);
+    public static volatile ExecutorService connectExecutor = newConnectExecutor();
     public static final Gson GSON = GsonUtils.getNullGson();
     public static final Path CONFIG_FOLDER = FileUtils.checkFolder(PlatformHelper.getGamePath().resolve("mcbot"));
     public static final Path DATA_FOLDER = FileUtils.checkFolder(CONFIG_FOLDER.resolve("data"));
@@ -37,9 +38,11 @@ public class Constants {
         if (msgExecutor.isShutdown()) msgExecutor = Executors.newCachedThreadPool();
         if (cqExecutor.isShutdown()) cqExecutor = Executors.newSingleThreadExecutor();
         if (commonExecutor.isShutdown()) commonExecutor = Executors.newFixedThreadPool(4);
+        if (connectExecutor.isShutdown()) connectExecutor = newConnectExecutor();
     }
 
     public static void shutdown(){
+        connectExecutor.shutdownNow();
         cqExecutor.shutdownNow();
         msgExecutor.shutdownNow();
         commonExecutor.shutdown();
@@ -52,5 +55,13 @@ public class Constants {
             commonExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    private static ExecutorService newConnectExecutor() {
+        return Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "McBot-OneBot-Connect");
+            thread.setDaemon(true);
+            return thread;
+        });
     }
 }

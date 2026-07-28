@@ -10,8 +10,9 @@ public class BotIDCommand {
 
 
     public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        int id = context.getArgument("BotId", Integer.class);
+        long id = context.getArgument("BotId", Long.class);
         ModConfig.get().getBotConfig().getBotId().setValueFromString(String.valueOf(id));
+        ModConfig.get().save();
         context.getSource().sendSuccess(() -> Component.literal("已设置机器人QQ号为:" + id + "！"), true);
         
         return 1;
