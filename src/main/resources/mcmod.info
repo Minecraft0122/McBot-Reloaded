@@ -1,14 +1,14 @@
 [
   {
     "modid": "botapi",
-    "name": "Bot-Connect",
-    "description": "Adds chat linking between QQ and Minecraft and QQ commands to request server data.",
+    "name": "McBot",
+    "description": "连接 Minecraft 服务器与 QQ 群，支持双向聊天转发和服务器信息查询命令。",
     "version": "${version}",
     "mcversion": "${mcversion}",
-    "url": "https://www.evolvefield.cn",
+    "url": "https://github.com/Minecraft0122/McBot-Reloaded",
     "updateUrl": "",
-    "authorList": ["cnlimiter"],
-    "credits": "The Forge and FML guys, for making this example",
+    "authorList": ["cnlimiter", "Minecraft0122"],
+    "credits": "原作：cnlimiter 与 Nova Committee；现维护者：Minecraft0122",
     "logoFile": "BotApi.png",
     "screenshots": [],
     "dependencies": []
