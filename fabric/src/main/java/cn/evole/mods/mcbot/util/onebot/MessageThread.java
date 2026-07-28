@@ -19,9 +19,15 @@ import java.util.concurrent.Executors;
  * @Description: 笑点解析：
  */
 public class MessageThread {
-    private final ExecutorService executor;
+    private ExecutorService executor;
     public MessageThread() {
-        executor = Executors.newCachedThreadPool();
+        start();
+    }
+
+    public synchronized void start() {
+        if (executor == null || executor.isShutdown()) {
+            executor = Executors.newCachedThreadPool();
+        }
     }
 
     public void submit(long groupId, String msg, boolean autoEscape) {

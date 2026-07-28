@@ -58,5 +58,13 @@ public class ConfigManager {
         return config == null ? defaultConfig : config;
     }
 
+    public synchronized void reload() throws IOException {
+        reference.load();
+    }
+
+    public synchronized boolean save() {
+        return configReference.setAndSave(config());
+    }
+
 
 }

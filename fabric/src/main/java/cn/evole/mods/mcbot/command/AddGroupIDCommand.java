@@ -25,6 +25,7 @@ public class AddGroupIDCommand {
             //#endif
         } else {
             ConfigManager.instance().getCommon().addGroupId(id);
+            ConfigManager.INSTANCE.save();
             //#if MC >= 12000
             //$$ context.getSource().sendSuccess(()->Component.literal("已成功添加QQ群号:" + id + "！"), true);
             //#elseif MC < 11900

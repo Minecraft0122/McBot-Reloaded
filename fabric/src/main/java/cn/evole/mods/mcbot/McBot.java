@@ -94,18 +94,16 @@ public class McBot implements ModInitializer {
     }
 
     public void onServerStarting(MinecraftServer server) {
+        Const.isShutdown = false;
+        Const.messageThread.start();
         SERVER = server;//获取服务器实例
     }
 
     public void onServerStarted(MinecraftServer server) {
-        if (ConfigManager.instance().getCommon().isAutoOpen()) {
-            try {
-                Const.wsConnect();
-            } catch (RuntimeException e) {
-                LOGGER.error("自动连接 OneBot 失败，可修正配置后使用连接命令重试", e);
-            }
-        }
         CustomCmdHandler.INSTANCE.load();//自定义命令加载
+        if (ConfigManager.instance().getCommon().isAutoOpen()) {
+            Const.wsConnectAsync();
+        }
         keepAlive = new KeepAlive();
         Const.messageThread.register(keepAlive::register);
     }

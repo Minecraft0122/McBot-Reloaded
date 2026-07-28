@@ -16,6 +16,7 @@ public class BotIDCommand {
     public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         long id = context.getArgument("BotId", Long.class);
         ConfigManager.instance().getBotConfig().setBotId(id);
+        ConfigManager.INSTANCE.save();
         //#if MC >= 12000
         //$$ context.getSource().sendSuccess(()->Component.literal("已设置机器人QQ号为:" + id + "！"), true);
         //#elseif MC < 11900

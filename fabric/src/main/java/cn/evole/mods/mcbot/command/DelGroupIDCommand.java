@@ -13,9 +13,17 @@ public class DelGroupIDCommand {
 
 
     public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        val id = context.getArgument("GroupID", Long.class);
+        val id = context.getArgument("GroupId", Long.class);
         if (ConfigManager.instance().getCommon().getGroupIdList().contains(id)) {
             ConfigManager.instance().getCommon().removeGroupId(id);
+            ConfigManager.INSTANCE.save();
+            //#if MC >= 12000
+            //$$ context.getSource().sendSuccess(()->Component.literal("已成功删除QQ群号：" + id + "！"), true);
+            //#elseif MC < 11900
+            context.getSource().sendSuccess(new TextComponent("已成功删除QQ群号：" + id + "！"), true);
+            //#else
+            //$$ context.getSource().sendSuccess(Component.literal("已成功删除QQ群号：" + id + "！"), true);
+            //#endif
         } else {
             //#if MC >= 12000
             //$$ context.getSource().sendSuccess(()->Component.literal("QQ群号:" + id + "并未出现！"), true);
