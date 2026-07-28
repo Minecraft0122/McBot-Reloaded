@@ -2,6 +2,8 @@
 
 McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot-11) 协议的 Minecraft 服务端模组，用于在 Minecraft 服务器与 QQ 群之间转发消息，并允许群成员查询服务器状态或执行获准的自定义命令。
 
+完整的安装、OneBot 接入、配置、命令和故障排除说明见[中文 Wiki 源文件](https://github.com/Minecraft0122/McBot-Reloaded/tree/1.20.1/wiki)。GitHub Wiki 初始化后会由工作流自动同步这些页面。
+
 本项目由 **Minecraft0122** 继续维护；本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。代码源自 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot)，原作者与历史贡献者署名依照 GPL-3.0-or-later 保留。
 
 ## 下载

@@ -1,0 +1,68 @@
+name: '同步 Wiki'
+
+on:
+  push:
+    branches:
+      - '1.20.1'
+    paths:
+      - 'wiki/**'
+      - '.github/workflows/wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: '发布中文 Wiki'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: '检出主仓库'
+        uses: actions/checkout@v7
+
+      - name: '检查 Wiki 是否已初始化'
+        id: wiki
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          wiki_url="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          if git ls-remote "$wiki_url" HEAD >/dev/null 2>&1; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'GitHub Wiki 尚未创建首个页面，本次安全跳过同步。'
+          fi
+
+      - name: '检出 Wiki 仓库'
+        if: steps.wiki.outputs.ready == 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki-repository
+          token: ${{ github.token }}
+
+      - name: '同步页面并推送'
+        if: steps.wiki.outputs.ready == 'true'
+        shell: bash
+        working-directory: wiki-repository
+        run: |
+          git rm -rf --ignore-unmatch .
+          cp -R "$GITHUB_WORKSPACE/wiki/." .
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo 'Wiki 内容没有变化。'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs: 同步 McBot Reloaded 中文 Wiki'
+          git push
