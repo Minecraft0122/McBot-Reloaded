@@ -85,7 +85,8 @@ public class McBot implements ModInitializer {
             listener = WatchServiceListener.create();
             configManager = new ConfigManager(CONFIG_FILE, listener);
         } catch (Exception e) {
-            LOGGER.error("配置加载错误...");
+            LOGGER.error("无法初始化 McBot 配置", e);
+            throw new IllegalStateException("无法初始化 McBot 配置", e);
         }
         I18n.init();//初始化国际化
         UserBindApi.load(CONFIG_FOLDER);//群服绑定
@@ -98,8 +99,11 @@ public class McBot implements ModInitializer {
 
     public void onServerStarted(MinecraftServer server) {
         if (ConfigManager.instance().getCommon().isAutoOpen()) {
-            onebot = OneBotClient.create(ConfigManager.instance().getBotConfig().build()).open().registerEvents(new IBotEvent());
-            connected = true;
+            try {
+                Const.wsConnect();
+            } catch (RuntimeException e) {
+                LOGGER.error("自动连接 OneBot 失败，可修正配置后使用连接命令重试", e);
+            }
         }
         CustomCmdHandler.INSTANCE.load();//自定义命令加载
         keepAlive = new KeepAlive();
@@ -109,18 +113,27 @@ public class McBot implements ModInitializer {
     public void onServerStopping(MinecraftServer server) {
         Const.isShutdown = true;
         LOGGER.info("▌ §c正在关闭群服互联");
+        connected = false;
+        if (onebot != null) {
+            try {
+                onebot.close();
+            } catch (RuntimeException e) {
+                LOGGER.warn("关闭 OneBot WebSocket 时发生异常", e);
+            } finally {
+                onebot = null;
+            }
+        }
+        Const.shutdown();
+        CQUtils.shutdown();
         UserBindApi.save(CONFIG_FOLDER);
         ChatRecordApi.save(CONFIG_FOLDER);
         CustomCmdHandler.INSTANCE.clear();//自定义命令持久层清空
     }
 
     public void onServerStopped(MinecraftServer server) {
-        Const.shutdown();
-        CQUtils.shutdown();
-        if (onebot != null) onebot.close();
-        configManager.close();
+        if (configManager != null) configManager.close();
         try {
-            listener.close();
+            if (listener != null) listener.close();
         } catch (IOException e) {
             LOGGER.error("无法关闭监听配置文件进程，请手动关闭");
         }

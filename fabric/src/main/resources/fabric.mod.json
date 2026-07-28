@@ -3,15 +3,16 @@
   "id": "mcbot_${mc_version}",
   "version": "${version}",
   "name": "McBot",
-  "description": "Adds chat linking between QQ and Minecraft and QQ commands to request server data.",
+  "description": "连接 Minecraft 服务器与 QQ 群，支持双向聊天转发和服务器信息查询命令。",
   "authors": [
-    "cnlimiter"
+    "cnlimiter",
+    "Minecraft0122"
   ],
   "contact": {
-    "issues": "https://github.com/cnlimiter/McBot/issues",
-    "sources": "https://github.com/cnlimiter/McBot"
+    "issues": "https://github.com/Minecraft0122/McBot-Reloaded/issues",
+    "sources": "https://github.com/Minecraft0122/McBot-Reloaded"
   },
-  "license": "AGPL-3.0",
+  "license": "GPL-3.0-or-later",
   "icon": "assets/mcbot/icon.png",
   "environment": "server",
   "entrypoints": {
@@ -26,6 +27,6 @@
     "fabricloader": ">=0.14.0",
     "fabric": "*",
     "minecraft": "${minecraft_dependency}",
-    "java": ">=8"
+    "java": "${java_dependency}"
   }
 }

@@ -31,16 +31,17 @@ public class KeepAlive {
     }
 
     public void register() {
-        while (true) {
+        while (!Const.isShutdown) {
             val limit = ConfigManager.instance().getBotConfig().getMaxReconnectAttempts();
             if (McBot.connected && ConfigManager.instance().getBotConfig().isReconnect() && limit >= 1) {
-                if (McBot.onebot.getWs().isClosed()) {  // 当你写完复杂的机制后突然发现有现成的api时 be like
+                if (!Const.isShutdown && McBot.onebot != null && McBot.onebot.getWs().isClosed()) {
                     reconnect(limit);
                 }
             }
             try {
                 Thread.sleep(ConfigManager.instance().getBotConfig().getTimeoutCompensation());
             } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
                 return;
             }
         }
@@ -48,19 +49,25 @@ public class KeepAlive {
 
     private void reconnect(final int limit) {
         int hasReconnect = 0;
-        while (hasReconnect <= limit) {
+        while (hasReconnect < limit) {
+            if (Const.isShutdown) return;
             Const.LOGGER.info("正在尝试重连...第{}次", hasReconnect + 1);
-            Const.wsConnect();
+            try {
+                Const.wsConnect();
+            } catch (RuntimeException e) {
+                Const.LOGGER.warn("第 {} 次 OneBot 重连失败", hasReconnect + 1, e);
+            }
             try {
                 Thread.sleep(ConfigManager.instance().getBotConfig().getTimeoutCompensation());
             } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
                 return;
             }
-            if (McBot.onebot.getWs().isClosed()) hasReconnect++;
-            else return;
+            if (McBot.onebot != null && McBot.onebot.getWs().isOpen()) return;
+            hasReconnect++;
         }
         Const.sendAllPlayerMsg("▌ " + ChatFormatting.RED + "群服互联意外断开，请联系服务器管理者。");
-        McBot.onebot.getWs().close();
+        if (McBot.onebot != null) McBot.onebot.close();
         McBot.connected = false;
     }
 

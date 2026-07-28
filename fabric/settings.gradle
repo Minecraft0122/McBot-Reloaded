@@ -27,7 +27,7 @@ pluginManagement {
     }
     resolutionStrategy {
         eachPlugin {
-            if (requested.id.id  ==  "com.github.replaymod.preprocessor" )
+            if (requested.id.id == "com.replaymod.preprocess")
                 useModule("com.github.replaymod:preprocessor:${requested.version}")
         }
     }

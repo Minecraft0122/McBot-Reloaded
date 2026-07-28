@@ -102,13 +102,37 @@ public class Const {
     /**
      * WS连接
      */
-    public static void wsConnect(){
-        McBot.onebot.close();//关闭线程
-        McBot.onebot = null;//强制为null
-        McBot.onebot = OneBotClient.create(ConfigManager.instance().getBotConfig().build()).open().registerEvents(new IBotEvent());//重新实例化
-        ConfigManager.instance().getStatus().setREnable(true);
-        ConfigManager.instance().getCommon().setEnable(true);
-        McBot.connected = true;
+    public static synchronized void wsConnect(){
+        if (isShutdown) {
+            throw new IllegalStateException("服务器正在关闭，不能建立 OneBot 连接");
+        }
+
+        OneBotClient previous = McBot.onebot;
+        McBot.onebot = null;
+        McBot.connected = false;
+        if (previous != null) {
+            try {
+                previous.close();
+            } catch (RuntimeException e) {
+                LOGGER.warn("关闭旧 OneBot 连接时发生异常", e);
+            }
+        }
+
+        OneBotClient client = OneBotClient.create(ConfigManager.instance().getBotConfig().build());
+        try {
+            client.open().registerEvents(new IBotEvent());
+            McBot.onebot = client;
+            ConfigManager.instance().getStatus().setREnable(true);
+            ConfigManager.instance().getCommon().setEnable(true);
+            McBot.connected = true;
+        } catch (RuntimeException e) {
+            try {
+                client.close();
+            } catch (RuntimeException closeError) {
+                e.addSuppressed(closeError);
+            }
+            throw e;
+        }
     }
 
 
