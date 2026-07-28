@@ -14,9 +14,12 @@ import net.minecraftforge.event.entity.player.AchievementEvent;
 
 public class PlayerEventHandler {
     public static PlayerEventHandler INSTANCE = new PlayerEventHandler();
+    private boolean initialized;
 
-    public void preInit() {
+    public synchronized void preInit() {
+        if (initialized) return;
         FMLCommonHandler.instance().bus().register(this);
+        initialized = true;
     }
 
     @SubscribeEvent

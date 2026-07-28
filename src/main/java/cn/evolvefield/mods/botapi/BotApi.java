@@ -43,6 +43,8 @@ public class BotApi {
 
     @Mod.EventHandler
     public void onServerAboutToStart(FMLServerStartingEvent event) {
+        Const.isShutdown = false;
+        if (app.isShutdown()) app = Executors.newFixedThreadPool(1);
         SERVER = event.getServer();
         event.registerServerCommand(new CmdEventHandler());
         CustomCmdHandler.INSTANCE.load(CONFIG_FOLDER);//自定义命令加载
@@ -55,18 +57,26 @@ public class BotApi {
         TickEventHandler.INSTANCE.preInit();
         blockingQueue = new LinkedBlockingQueue<>();//使用队列传输数据
         if (ConfigHandler.cached().getCommon().isAutoOpen()) {
-            try {
-                app.submit(() -> {
-                    service = new ConnectFactory(ConfigHandler.cached().getBotConfig(), blockingQueue);//创建websocket连接
-                    bot = service.ws.createBot();//创建机器人实例
-                });
-            } catch (Exception e) {
-                Const.LOGGER.error("§c机器人服务端未配置或未打开");
-            }
+            connectAsync();
         }
         dispatchers = new EventBus(blockingQueue);//创建事件分发器
 
         BotEventHandler.init(dispatchers);//事件监听s
+    }
+
+    public static void connectAsync() {
+        if (app.isShutdown()) app = Executors.newFixedThreadPool(1);
+        app.submit(() -> {
+            try {
+                ConnectFactory newService = new ConnectFactory(ConfigHandler.cached().getBotConfig(), blockingQueue);
+                if (newService.ws == null) throw new IllegalStateException("未能创建 WebSocket 客户端");
+                Bot newBot = newService.ws.createBot();
+                service = newService;
+                bot = newBot;
+            } catch (RuntimeException e) {
+                if (!Const.isShutdown) Const.LOGGER.error("§c机器人服务端未配置、未启动或连接失败", e);
+            }
+        });
     }
     @Mod.EventHandler
     public void onServerStopping(FMLServerStoppingEvent event){

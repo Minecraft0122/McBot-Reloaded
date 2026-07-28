@@ -4,7 +4,6 @@ package cn.evolvefield.mods.botapi.common.cmds;
 import cn.evolvefield.mods.botapi.BotApi;
 import cn.evolvefield.mods.botapi.Const;
 import cn.evolvefield.mods.botapi.init.handler.ConfigHandler;
-import cn.evolvefield.onebot.client.connection.ConnectFactory;
 import cn.evolvefield.onebot.client.config.BotConfig;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import lombok.val;
@@ -23,16 +22,10 @@ public class ConnectCommand {
             sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "cqhttp"));
             ConfigHandler.cached().getBotConfig().setMiraiHttp(false);
 
-            try {
-                BotApi.app.submit(() -> {
-                    BotApi.service = new ConnectFactory(ConfigHandler.cached().getBotConfig(), BotApi.blockingQueue);//创建websocket连接
-                    BotApi.bot = BotApi.service.ws.createBot();//创建机器人实例
-                });
-            } catch (Exception e) {
-                Const.LOGGER.error("§c机器人服务端配置不正确");
-            }
+            BotApi.connectAsync();
             ConfigHandler.cached().getStatus().setRECEIVE_ENABLED(true);
             ConfigHandler.cached().getCommon().setEnable(true);
+            ConfigHandler.save();
 
 
 
@@ -48,16 +41,10 @@ public class ConnectCommand {
             ConfigHandler.cached().getBotConfig().setUrl(BotConfig.normalizeWebSocketUrl(parameter));
             sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "mirai"));
             ConfigHandler.cached().getBotConfig().setMiraiHttp(true);
-            try {
-                BotApi.app.submit(() -> {
-                    BotApi.service = new ConnectFactory(ConfigHandler.cached().getBotConfig(), BotApi.blockingQueue);//创建websocket连接
-                    BotApi.bot = BotApi.service.ws.createBot();//创建机器人实例
-                });
-            } catch (Exception e) {
-                Const.LOGGER.error("§c机器人服务端配置不正确");
-            }
+            BotApi.connectAsync();
             ConfigHandler.cached().getStatus().setRECEIVE_ENABLED(true);
             ConfigHandler.cached().getCommon().setEnable(true);
+            ConfigHandler.save();
 
 
 
@@ -70,14 +57,7 @@ public class ConnectCommand {
 
         sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "cqhttp"));
         ConfigHandler.cached().getBotConfig().setMiraiHttp(false);
-        try {
-            BotApi.app.submit(() -> {
-                BotApi.service = new ConnectFactory(ConfigHandler.cached().getBotConfig(), BotApi.blockingQueue);//创建websocket连接
-                BotApi.bot = BotApi.service.ws.createBot();//创建机器人实例
-            });
-        } catch (Exception e) {
-            Const.LOGGER.error("§c机器人服务端配置不正确");
-        }
+        BotApi.connectAsync();
         ConfigHandler.cached().getStatus().setRECEIVE_ENABLED(true);
         ConfigHandler.cached().getCommon().setEnable(true);
         ConfigHandler.save();
@@ -90,14 +70,7 @@ public class ConnectCommand {
 
         sender.addChatMessage(new ChatComponentText("尝试链接框架" + ChatFormatting.LIGHT_PURPLE + "mirai"));
         ConfigHandler.cached().getBotConfig().setMiraiHttp(true);
-        try {
-            BotApi.app.submit(() -> {
-                BotApi.service = new ConnectFactory(ConfigHandler.cached().getBotConfig(), BotApi.blockingQueue);//创建websocket连接
-                BotApi.bot = BotApi.service.ws.createBot();//创建机器人实例
-            });
-        } catch (Exception e) {
-            Const.LOGGER.error("§c机器人服务端配置不正确");
-        }
+        BotApi.connectAsync();
         ConfigHandler.cached().getStatus().setRECEIVE_ENABLED(true);
         ConfigHandler.cached().getCommon().setEnable(true);
 

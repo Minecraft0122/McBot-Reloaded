@@ -13,9 +13,12 @@ import java.util.Queue;
 
 public class TickEventHandler {
     public static TickEventHandler INSTANCE = new TickEventHandler();
+    private boolean initialized;
 
-    public void preInit() {
+    public synchronized void preInit() {
+        if (initialized) return;
         FMLCommonHandler.instance().bus().register(this);
+        initialized = true;
     }
     private static final Queue<String> toSendQueue = new LinkedList<>();;
     public static Queue<String> getToSendQueue() {
