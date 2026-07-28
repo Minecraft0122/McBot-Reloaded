@@ -47,16 +47,17 @@ public class IMcBot {
     }
 
     public void onServerStarting(MinecraftServer server) {
+        Const.isShutdown = false;
+        Const.messageThread.start();
         SERVER = server;//获取服务器实例
     }
 
     public void onServerStarted(MinecraftServer server) {
         ModConfig.INSTANCE.save();
-        if (ModConfig.INSTANCE.getCommon().isAutoOpen()) {
-            onebot = OneBotClient.create(ModConfig.INSTANCE.getBotConfig().build()).open().registerEvents(new IBotEvent());
-            connected = true;
-        }
         CustomCmdHandler.INSTANCE.load();//自定义命令加载
+        if (ModConfig.INSTANCE.getCommon().isAutoOpen()) {
+            Const.wsConnectAsync();
+        }
         keepAlive = new KeepAlive();
         Const.messageThread.register(keepAlive::register);//自动重连注册
     }

@@ -12,7 +12,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.concurrent.Callable;
+import cn.evole.mods.mcbot.util.MinecraftTextUtils;
 //#if MC >= 11700
 //$$ import org.slf4j.Logger;
 //$$ import org.slf4j.LoggerFactory;
@@ -50,13 +52,13 @@ public class Const {
     }
 
     public static void sendAllGroupMsg(String message){
-        for (long id : ModConfig.INSTANCE.getCommon().getGroupIdList()){
+        for (long id : new LinkedHashSet<Long>(ModConfig.INSTANCE.getCommon().getGroupIdList())){
             sendGroupMsg(id, message);
         }
     }
 
     public static void sendAllGroupMsg(Callable<String> message){
-        for (long id : ModConfig.INSTANCE.getCommon().getGroupIdList()){
+        for (long id : new LinkedHashSet<Long>(ModConfig.INSTANCE.getCommon().getGroupIdList())){
             sendGroupMsg(id, message);
         }
     }
@@ -67,7 +69,7 @@ public class Const {
      * @param player 玩家
      */
     public static void sendAllGroupMsg(Callable<String> message, ServerPlayer player){
-        for (long id : ModConfig.INSTANCE.getCommon().getGroupIdList()){
+        for (long id : new LinkedHashSet<Long>(ModConfig.INSTANCE.getCommon().getGroupIdList())){
             messageThread.submit(id, message, false, player);
         }
     }
@@ -78,6 +80,22 @@ public class Const {
 
     public static void sendGroupMsg(long id, Callable<String> message){
         messageThread.submit(id, message, false);
+    }
+
+    public static void sendGroupText(long id, String message) {
+        String cleanMessage = MinecraftTextUtils.sanitizeForOneBot(message);
+        if (cleanMessage.trim().isEmpty()) return;
+
+        int start = 0;
+        while (start < cleanMessage.length()) {
+            int end = Math.min(cleanMessage.length(), start + 3500);
+            if (end < cleanMessage.length()) {
+                int newline = cleanMessage.lastIndexOf('\n', end - 1);
+                if (newline >= start) end = newline + 1;
+            }
+            messageThread.submit(id, cleanMessage.substring(start, end), true);
+            start = end;
+        }
     }
 
     /**
@@ -137,6 +155,16 @@ public class Const {
             }
             throw e;
         }
+    }
+
+    public static void wsConnectAsync() {
+        messageThread.register(() -> {
+            try {
+                wsConnect();
+            } catch (RuntimeException e) {
+                if (!isShutdown) LOGGER.error("连接 OneBot 失败，可修正配置后使用连接命令重试", e);
+            }
+        });
     }
 
 

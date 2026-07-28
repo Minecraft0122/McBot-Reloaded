@@ -26,7 +26,7 @@ public class CmdApi {
     }
 
     private static void GroupCmd(long groupId, String cmd, boolean isOp, boolean OPEscape) {
-        Const.sendGroupMsg(groupId, CmdMain(cmd, isOp, OPEscape));
+        Const.sendGroupText(groupId, CmdMain(cmd, isOp, OPEscape));
     }
 
     public static void invokeCommandGroup(String msg, GroupMessageEvent event) {
@@ -34,6 +34,8 @@ public class CmdApi {
         String originCommand = command;
         command = BotUtils.cmdParse(command);
         String performedCommand = command;
+        Const.LOGGER.info("QQ群 {} 的用户 {} 执行 McBot 命令：{}",
+                event.getGroupId(), event.getUserId(), performedCommand);
 
         if (performedCommand.equals("list")) {
             // 如果指令包含list,则强行以非管理员身份执行

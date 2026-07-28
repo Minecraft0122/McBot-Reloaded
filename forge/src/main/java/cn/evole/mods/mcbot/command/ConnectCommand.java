@@ -52,7 +52,7 @@ public class ConnectCommand {
             //#else
             //$$ context.getSource().sendSuccess(Component.literal("▌ " +ChatFormatting.LIGHT_PURPLE + "尝试链接框架"), true);
             //#endif
-            Const.wsConnect();
+            Const.wsConnectAsync();
         } else {
             //#if MC >= 12000
             //$$ context.getSource().sendSuccess(()->Component.literal("▌ " +ChatFormatting.LIGHT_PURPLE + "已存在WS连接"), true);
