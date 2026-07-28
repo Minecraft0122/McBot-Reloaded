@@ -2,6 +2,23 @@
 
 本文件记录 McBot 的重要变更。历史内容整理自上游提交记录。
 
+## [3.0.1](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.1) - 2026-07-28
+
+### 修复
+
+- 修复 `/mcbot setBot` 的 Brigadier 参数类型不匹配，并让机器人账号、群号与连接地址修改立即保存。
+- `/mcbot connect` 现在接受 `ws://`、`wss://` 和无协议地址，后台建立连接，不再因网络超时阻塞服务器启动或命令线程。
+- 修复旧版 Fabric/Forge 的 `/mcbot delGroup` 参数名不一致和 `/mcbot reload` 空操作。
+- 移除 FTB 等模组产生的 Minecraft/ANSI 颜色控制码，保留换行并安全分段复杂命令文本。
+- 群命令写入服务端控制台审计日志，事件注册改为幂等，历史配置中的重复群号不再造成重复转发。
+- 1.7.10 修复误用 `Long.getLong` 导致的 `setBot` 空值，并通过 Java 8 完整构建。
+
+### 验证与限制
+
+- 1.20.1 Fabric/Forge 与 1.21.1 Fabric/NeoForge 已通过单元测试和完整构建。
+- 旧版 Fabric/Forge 1.16.5、1.18.2、1.19.2 已通过本地完整构建。
+- 1.12.2 仍被已下架的 `OneBot-SDK:0.1.4` 制品阻塞；图片化复杂命令输出与特定模组组合仍需后续实现或实机回归。
+
 ## [3.0.0](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.0) - 2026-07-28
 
 ### 版本与维护

@@ -77,7 +77,7 @@ OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQ
 - `%user_nickname%`：发送者昵称
 - 单独的 `%`：按顺序替换为群命令参数
 
-修改自定义命令后重启服务器，以确保命令文件被完整重新加载。
+修改自定义命令或配置后执行 `/mcbot reload` 即可重新加载，无需重启服务器。
 
 ## 中文支持
 
@@ -93,11 +93,11 @@ Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/b
 
 ## 自动发布
 
-向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.0` 时：
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.1` 时：
 
 ```bash
-git tag 3.0.0
-git push origin 3.0.0
+git tag 3.0.1
+git push origin 3.0.1
 ```
 
 自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
@@ -110,6 +110,7 @@ git push origin 3.0.0
 - [上游问题列表](https://github.com/Nova-Committee/McBot/issues)
 - [上游开放问题梳理](UPSTREAM_ISSUES.md)
 - [上游拉取请求梳理](UPSTREAM_PULLS.md)
+- [MC 百科已知问题复核](MCMOD_KNOWN_ISSUES.md)
 - [全部支持版本](SUPPORTED_VERSIONS.md)
 
 ## 致谢与许可

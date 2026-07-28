@@ -4,7 +4,7 @@
 
 ## 正式维护
 
-| Minecraft | 加载器 | Java | 分支 | 3.0.0 状态 |
+| Minecraft | 加载器 | Java | 分支 | 3.0.1 状态 |
 | --- | --- | --- | --- | --- |
 | 1.20.1 | Fabric 0.16.9+、Fabric API 0.92.2+1.20.1 | 17+ | `1.20.1` | 已通过测试与完整构建 |
 | 1.20.1 | Forge 47.3.12—47.x | 17+ | `1.20.1` | 已通过测试与完整构建 |
@@ -19,13 +19,13 @@
 
 | Minecraft | 已有加载器实现 | 通常所需 Java | 源码位置/说明 |
 | --- | --- | --- | --- |
-| 1.7.10 | Forge | 8；GTNH 的 Java 21 环境另行兼容验证 | `1.7.10`，本地与 GitHub Actions 干净构建均通过；群号解析、OneBot 数组消息和 WSS 已修复 |
+| 1.7.10 | Forge | 8；GTNH 的 Java 21 环境另行兼容验证 | `1.7.10`，Java 8 完整构建通过；群号解析、`setBot`、OneBot 数组消息、WSS、热重载和重复事件注册已修复 |
 | 1.12.2 | Forge | 8 | `1.12.2`，旧版 OneBot SDK 0.1.4 上游制品已失效，暂不发布二进制文件 |
 | 1.14.4、1.15.2、1.17.1 | Fabric/Forge 开发实现 | 8/16 | `fabric-dev`、`forge-dev`，历史开发级支持 |
-| 1.16.5 | Fabric | 8 | `fabric`，已通过聚合预处理编译；尚未作为独立正式 Release 回归 |
+| 1.16.5 | Fabric | 8 | `fabric`，已通过聚合预处理与完整构建；尚未作为独立正式 Release 回归 |
 | 1.16.5 | Forge | 8 | `forge`，本地与 GitHub Actions 完整构建均通过；OneBot 与 AtomConfig 已打入最终 JAR |
-| 1.18.2 | Fabric、Forge；另有 Quilt 实验分支 | 17 | `fabric`、`forge` 的预处理编译通过；`1.18-quilt` 仍为实验实现 |
-| 1.19.2 | Fabric、Forge | 17 | `fabric`、`forge`，WSS、首次连接、重连和停服修复已回移；两种加载器均通过本地与 GitHub Actions 完整构建 |
+| 1.18.2 | Fabric、Forge；另有 Quilt 实验分支 | 17 | `fabric`、`forge` 均通过本地完整构建；连接改为后台执行并增加重复群号防护；`1.18-quilt` 仍为实验实现 |
+| 1.19.2 | Fabric、Forge | 17 | `fabric`、`forge`，WSS、首次连接、重连、停服、后台连接和重复群号修复已回移；两种加载器均通过本地完整构建 |
 | 1.19.3、1.19.4 | Fabric、Forge | 17 | `fabric`、`forge` |
 | 1.20.2 | Fabric/Forge 开发实现 | 17 | `fabric-dev`、`forge-dev`，历史开发级支持 |
 | 1.20.4 | Fabric | 17 | `fabric` |
