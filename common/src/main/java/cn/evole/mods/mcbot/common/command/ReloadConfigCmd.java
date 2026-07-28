@@ -1,5 +1,9 @@
 package cn.evole.mods.mcbot.common.command;
 
+import cn.evole.mods.mcbot.Constants;
+import cn.evole.mods.mcbot.common.config.ModConfig;
+import cn.evole.mods.mcbot.plugins.cmd.CmdHandler;
+import cn.evole.mods.mcbot.util.locale.I18n;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,13 +18,14 @@ import net.minecraft.network.chat.Component;
 public class ReloadConfigCmd {
     public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         try {
-            //Constants.configManager..reload();
-//            if (Constants.configManager.config() == null) {
-//                context.getSource().sendSuccess(() -> Component.literal("重载配置失败"), true);
-//            }
-            context.getSource().sendSuccess(() -> Component.literal("重载配置成功"), true);
+            ModConfig.get().load();
+            I18n.reload();
+            CmdHandler.load();
+            context.getSource().sendSuccess(() -> Component.literal("配置与自定义命令已重新加载。"), true);
         } catch (Exception e) {
-            context.getSource().sendSuccess(() -> Component.literal("重载配置失败"), true);
+            Constants.LOGGER.error("重新加载配置失败", e);
+            context.getSource().sendFailure(Component.literal("重新加载配置失败，请查看服务器日志。"));
+            return 0;
         }
         
         return 1;

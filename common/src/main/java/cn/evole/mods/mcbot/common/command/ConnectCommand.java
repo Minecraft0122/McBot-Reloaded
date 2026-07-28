@@ -3,6 +3,7 @@ package cn.evole.mods.mcbot.common.command;
 
 import cn.evole.mods.mcbot.Constants;
 import cn.evole.mods.mcbot.api.connect.ConnectApi;
+import cn.evole.mods.mcbot.common.config.BotConfig;
 import cn.evole.mods.mcbot.common.config.ModConfig;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -11,22 +12,16 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
-import java.util.regex.Pattern;
-
 public class ConnectCommand {
-    private static final Pattern ipv4Pattern = Pattern.compile("(\\d+\\.\\d+\\.\\d+\\.\\d+):(\\d+)");
-    private static final Pattern ipv6Pattern = Pattern.compile("\\[([0-9a-fA-F:]+)]:(\\d+)");
-    private static final Pattern domainPattern = Pattern.compile("([a-zA-Z0-9.-]+):(\\d+)");
-
     public static int execute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         val parameter = context.getArgument("parameter", String.class);
 
-        if (ipv4Pattern.matcher(parameter).find() || ipv6Pattern.matcher(parameter).find()|| domainPattern.matcher(parameter).find()) {
-            ModConfig.get().getBotConfig().getUrl().setValueFromString(String.format("ws://%s", parameter));
+        try {
+            ModConfig.get().getBotConfig().getUrl().setValueFromString(BotConfig.normalizeWebSocketUrl(parameter));
             doConnect(context);
             return 1;
-        } else {
-            context.getSource().sendSuccess(() -> Component.literal("▌ " + ChatFormatting.RED + "参数错误❌"), true);
+        } catch (IllegalArgumentException e) {
+            context.getSource().sendFailure(Component.literal("▌ " + ChatFormatting.RED + e.getMessage()));
             return 0;
         }
     }
@@ -37,20 +32,14 @@ public class ConnectCommand {
         return 1;
     }
 
-    public static int localExecute(CommandContext<CommandSourceStack> context) {
-        //AppHandler.init();
-        ModConfig.get().getBotConfig().getUrl().getDefaultValue();
-        doConnect(context);
-        return 1;
-    }
-
     public static void doConnect(CommandContext<CommandSourceStack> context) {
-        if (!Constants.onebot.getWs().isOpen()) {
-            context.getSource().sendSuccess(() -> Component.literal("▌ " + ChatFormatting.LIGHT_PURPLE + "尝试链接框架"), true);
-            ConnectApi.wsConnect();
-            
+        if (!ConnectApi.isConnected()) {
+            context.getSource().sendSuccess(() -> Component.literal("▌ " + ChatFormatting.LIGHT_PURPLE + "正在尝试连接机器人框架"), true);
+            if (!ConnectApi.wsConnect()) {
+                context.getSource().sendFailure(Component.literal("▌ " + ChatFormatting.RED + "连接失败，请检查地址、令牌和服务端日志"));
+            }
         } else {
-            context.getSource().sendSuccess(() -> Component.literal("▌ " + ChatFormatting.LIGHT_PURPLE + "已存在WS连接"), true);
+            context.getSource().sendSuccess(() -> Component.literal("▌ " + ChatFormatting.LIGHT_PURPLE + "WebSocket 已连接"), true);
         }
     }
 }

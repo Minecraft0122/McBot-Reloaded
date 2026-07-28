@@ -6,14 +6,11 @@ import cn.evole.mods.mcbot.common.config.ModConfig;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.minecraft.locale.Language;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,38 +21,38 @@ import java.util.Optional;
  * @Description:
  */
 public class I18n {
-    private static Map<String, String> translations;
+    private static final Gson GSON = new Gson();
+    private static volatile Map<String, String> translations = Map.of();
 
     public static void init() {
-        translations = new HashMap<>();
-
-
         Optional<Path> optional = PlatformHelper.getResourcePath("lang/" + ModConfig.get().getCommon().getLanguageSelect().getValue() + ".json");
 
         if (optional.isEmpty()) {
             Constants.LOGGER.warn("-----------------------------------------");
-            Constants.LOGGER.warn("McBot cannot find translations for \"" + ModConfig.get().getCommon().getLanguageSelect().getValue() + "\" and uses \"en_us\" by default!");
+            Constants.LOGGER.warn("找不到语言文件“{}”，将使用简体中文。", ModConfig.get().getCommon().getLanguageSelect().getValue());
             Constants.LOGGER.warn("");
-            Constants.LOGGER.warn("You are welcome to contribute translations!");
-            Constants.LOGGER.warn("Contributing: https://github.com/Nova-Committee/McBot#Contributing");
+            Constants.LOGGER.warn("欢迎向项目贡献翻译：https://github.com/Minecraft0122/McBot-Reloaded");
             Constants.LOGGER.warn("-----------------------------------------");
 
-            optional = PlatformHelper.getResourcePath("lang/en_us.json");
+            optional = PlatformHelper.getResourcePath("lang/zh_cn.json");
         }
 
         if (optional.isPresent()) {
             try {
-                String content = IOUtils.toString(Files.newInputStream(optional.get()), StandardCharsets.UTF_8);
-                translations = new Gson().fromJson(content, new TypeToken<Map<String, String>>() {
+                String content = Files.readString(optional.get(), StandardCharsets.UTF_8);
+                Map<String, String> loaded = GSON.fromJson(content, new TypeToken<Map<String, String>>() {
                 }.getType());
+                translations = loaded == null ? Map.of() : Map.copyOf(loaded);
             } catch (Exception e) {
-                Constants.LOGGER.error(ExceptionUtils.getStackTrace(e));
+                translations = Map.of();
+                Constants.LOGGER.error("加载语言文件失败", e);
             }
+        } else {
+            translations = Map.of();
         }
     }
 
     public static void reload() {
-        translations = null;
         init();
     }
 
@@ -70,11 +67,11 @@ public class I18n {
                 if (!translation2.equals(key2)) {
                     return String.format(translation2, args);
                 } else {
-                    return "TranslateError{\"key\":\"" + key2 + "\",\"args\":" + Arrays.toString(args) + "}";
+                    return "翻译错误{\"键\":\"" + key2 + "\",\"参数\":" + Arrays.toString(args) + "}";
                 }
             }
         } catch (Exception e) {
-            return "TranslateError{\"key\":\"" + key + "\",\"args\":" + Arrays.toString(args) + "}";
+            return "翻译错误{\"键\":\"" + key + "\",\"参数\":" + Arrays.toString(args) + "}";
         }
     }
 

@@ -8,6 +8,7 @@ import cn.evole.mods.mcbot.util.FileUtils;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Project: McBot
@@ -16,23 +17,19 @@ import java.util.List;
  * @Description:
  */
 public class UserInfoApi {
-    public static List<UserInfo> userInfos = new ArrayList<>();
+    public static List<UserInfo> userInfos = new CopyOnWriteArrayList<>();
     public static Path userBindFile = FileUtils.checkFile(Constants.DATA_FOLDER.resolve("userBind.csv"));
 
     public static boolean groupHas(String group_id, String user_id){
         for (UserInfo userInfo : userInfos){
-            if (userInfo.getGroupId().equals(group_id)){
-                return userInfo.getQqId().equals(user_id);
-            }
+            if (userInfo.getGroupId().equals(group_id) && userInfo.getQqId().equals(user_id)) return true;
         }
         return false;
     }
 
     public static boolean isInGame(String group_id, String game_name){
         for (UserInfo userInfo : userInfos){
-            if (userInfo.getGroupId().equals(group_id)){
-                return userInfo.getGameName().equals(game_name);
-            }
+            if (userInfo.getGroupId().equals(group_id) && userInfo.getGameName().equals(game_name)) return true;
         }
         return false;
     }

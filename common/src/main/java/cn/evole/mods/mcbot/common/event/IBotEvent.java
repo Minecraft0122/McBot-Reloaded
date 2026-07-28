@@ -29,6 +29,7 @@ public class IBotEvent implements Listener {
                 && !String.valueOf(event.getUserId()).equals(ModConfig.get().getBotConfig().getBotId().getValue())//过滤机器人
         ) {
             String send = CQUtils.replace(event, 2000);//暂时匹配仅符合字符串聊天内容与图片
+            if (send.isBlank()) return;
             if (!send.startsWith(ModConfig.get().getCmd().getCmdStart().getValue())//过滤命令前缀
             ) {
                 if (ModConfig.get().getStatus().getRChatEnable().getValue())/*接受聊天开关*/ onGroupMessage(event, send);
@@ -42,16 +43,15 @@ public class IBotEvent implements Listener {
 
     private void onGroupMessage(GroupMessageEvent event, String send) {
         if (ModConfig.get().getCmd().getQqChatPrefixOn().getValue()) {
-            val split = send.split(" ");
-            if (ModConfig.get().getCmd().getQqChatPrefix().getValue().equals(split[0])) //指定前缀发送
+            val split = send.split(" ", 2);
+            if (split.length == 2 && ModConfig.get().getCmd().getQqChatPrefix().getValue().equals(split[0])) //指定前缀发送
                 send = split[1];
             else return;
         }
 
-        val nick = event.getSender().getNickname();
         String groupNick = ModConfig.get().getCmd().getGroupNickOn().getValue() // 是否使用群昵称
-                ? nick == null ? event.getSender().getCard() : nick // 防止api返回为空
-                : event.getSender().getNickname();
+                ? firstNonBlank(event.getSender().getCard(), event.getSender().getNickname(), String.valueOf(event.getUserId()))
+                : firstNonBlank(event.getSender().getNickname(), String.valueOf(event.getUserId()));
 
         String finalMsg = ModConfig.get().getCmd().getGamePrefixOn().getValue()
                 ? ModConfig.get().getCmd().getIdGamePrefixOn().getValue()
@@ -59,9 +59,16 @@ public class IBotEvent implements Listener {
                 : String.format("§b[§l%s§b]§a<%s>§f %s", ModConfig.get().getCmd().getQqGamePrefix().getValue(), groupNick, send)
                 : String.format("§a<%s>§f %s", groupNick, send);
 
-        ChatRecordApi.syncAdd(String.valueOf(event.getMessageId()), String.valueOf(event.getGroupId()), String.valueOf(event.getSelfId()), finalMsg);
+        ChatRecordApi.syncAdd(String.valueOf(event.getMessageId()), String.valueOf(event.getGroupId()), String.valueOf(event.getUserId()), finalMsg);
 
         BotApi.sendAllPlayerMsg(finalMsg);
+    }
+
+    static String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank() && !"null".equalsIgnoreCase(value)) return value;
+        }
+        return "未知用户";
     }
 
 
@@ -91,7 +98,7 @@ public class IBotEvent implements Listener {
 
     @SubscribeEvent
     public void onLifeCycle(LifecycleMetaEvent event) {
-        if (!event.getSubType().equals("connect")) return;
+        if (!"connect".equals(event.getSubType())) return;
         if (ModConfig.get().getStatus().getConnectInfoEnable().getValue()
                 &&!ModConfig.get().getCommon().getGroupIdList().getValue().isEmpty()
         ) {

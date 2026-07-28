@@ -1,6 +1,7 @@
 package cn.evole.mods.mcbot.common.event;
 
 import cn.evole.mods.mcbot.api.bot.BotApi;
+import cn.evole.mods.mcbot.api.data.UserInfoApi;
 import cn.evole.mods.mcbot.common.config.ModConfig;
 import cn.evole.mods.mcbot.util.locale.I18n;
 import lombok.val;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.Level;
 public class IPlayerEvent {
     public static void loggedIn(Level world, ServerPlayer player) {
         if (ModConfig.get().getCommon().getBindOn().getValue()
-            //&& !UserInfoApi.isInGame(player.getGameProfile().getName())
+            && !isBound(player)
         ) {
             val toSend = Component.literal("请先完成绑定(爱来自群服互联~)");
             player.connection.disconnect(toSend);
@@ -41,7 +42,7 @@ public class IPlayerEvent {
 
     public static void loggedOut(Level world, ServerPlayer player) {
         if (ModConfig.get().getCommon().getBindOn().getValue()
-            //&& !UserBindApi.isIn(player.getGameProfile().getName())
+            && !isBound(player)
         ) {
             return;//防止冗余消息
         }
@@ -75,19 +76,23 @@ public class IPlayerEvent {
                 }
                 message = !itemStack.isEmpty() ? I18n.get(string + ".item", player.getDisplayName().getString(), component.getString(), itemStack.getDisplayName().getString()) : I18n.get(string,player.getDisplayName().getString(), component.getString());
             }
-            val msg = String.format(message, player.getDisplayName().getString());
-            BotApi.sendAllGroupMsg(msg);
+            BotApi.sendAllGroupMsg(message);
         }
     }
 
     public static void advancement(Player player, Advancement advancement) {
+        DisplayInfo display = advancement.display().orElse(null);
 
-        if (ModConfig.get().getStatus().getSAdvanceEnable().getValue() && ModConfig.get().getStatus().getSEnable().getValue()) {
-            DisplayInfo display = advancement.display().get();
+        if (ModConfig.get().getStatus().getSAdvanceEnable().getValue() && display != null && ModConfig.get().getStatus().getSEnable().getValue()) {
             String message = I18n.get("mcbot.chat.type.advancement." + display.getType().getSerializedName(), player.getDisplayName().getString(), I18n.get(display.getTitle().getString()));
-            val msg = String.format(message, player.getDisplayName().getString());
-            BotApi.sendAllGroupMsg(msg);
+            BotApi.sendAllGroupMsg(message);
         }
+    }
+
+    private static boolean isBound(ServerPlayer player) {
+        String gameName = player.getGameProfile().getName();
+        return ModConfig.get().getCommon().getGroupIdList().getValue().stream()
+                .anyMatch(groupId -> UserInfoApi.isInGame(groupId, gameName));
     }
 
 }

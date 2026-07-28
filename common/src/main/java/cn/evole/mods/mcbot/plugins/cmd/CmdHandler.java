@@ -48,13 +48,13 @@ public class CmdHandler {
             JsonObject json1 = GSON.fromJson("{'id': 'list', 'cmd': 'list', 'alies': ['服务器在线'], 'allow_members': [], permission: 'ALL', 'after_cmds': [], 'answer': 'NO', 'enable': true}", JsonObject.class);
             JsonObject json2 = GSON.fromJson("{'id': 'say', 'cmd': 'say %', 'alies': ['转发'], 'allow_members': [], permission: 'OP', 'after_cmds': [], 'answer': '转发成功！', 'enable': true}", JsonObject.class);
             JsonObject json3 = GSON.fromJson("{'id': 'bind', 'cmd': 'mcbot addBind %group_id% %user_id% %', 'alies': ['绑定'], 'allow_members': [], permission: 'ALL', 'after_cmds': [], 'answer': '绑定 % 成功！', 'enable': true}", JsonObject.class);
-            JsonObject json4 = GSON.fromJson("{'id': 'unbind', 'cmd': 'mcbot deBind %group_id% %user_id%', 'alies': ['取消绑定'], 'allow_members': [], permission: 'ALL', 'after_cmds': [], 'answer': '取消绑定 % 成功！', 'enable': true}", JsonObject.class);
+            JsonObject json4 = GSON.fromJson("{'id': 'unbind', 'cmd': 'mcbot delBind %group_id% %user_id%', 'alies': ['取消绑定'], 'allow_members': [], permission: 'ALL', 'after_cmds': [], 'answer': '取消绑定成功！', 'enable': true}", JsonObject.class);
 
             // 尝试创建和写入文件
-            try (FileWriter writerList = new FileWriter(new File(dir, "list.json"));
-                 FileWriter writerSay = new FileWriter(new File(dir, "say.json"));
-                 FileWriter writerBind = new FileWriter(new File(dir, "bind.json"));
-                 FileWriter writerUnbind = new FileWriter(new File(dir, "unbind.json"))
+            try (Writer writerList = Files.newBufferedWriter(new File(dir, "list.json").toPath(), StandardCharsets.UTF_8);
+                 Writer writerSay = Files.newBufferedWriter(new File(dir, "say.json").toPath(), StandardCharsets.UTF_8);
+                 Writer writerBind = Files.newBufferedWriter(new File(dir, "bind.json").toPath(), StandardCharsets.UTF_8);
+                 Writer writerUnbind = Files.newBufferedWriter(new File(dir, "unbind.json").toPath(), StandardCharsets.UTF_8)
                  ) {
 
                 GSON.toJson(json1, writerList);

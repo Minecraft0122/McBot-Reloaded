@@ -1,19 +1,21 @@
 modLoader = "javafml"
 loaderVersion = "${neoforge_loader_version_range}"
-#issueTrackerURL = ""
+issueTrackerURL = "https://github.com/Minecraft0122/McBot-Reloaded/issues"
 license = "${license}"
 
 [[mods]]
 modId = "${mod_id}"
 version = "${mod_version}"
 displayName = "${mod_name}"
-authors = "${mod_author}"
+authors = "${mod_author}, ${mod_maintainer}"
+displayURL = "https://github.com/Minecraft0122/McBot-Reloaded"
+credits = "${credits}"
 description = '''${description}'''
 #logoFile = ""
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
-versionRange = "[1.21.1,)"
+versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "SERVER"
 

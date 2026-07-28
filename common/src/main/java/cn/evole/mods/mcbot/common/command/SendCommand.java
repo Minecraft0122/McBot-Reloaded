@@ -37,7 +37,7 @@ public class SendCommand {
 
     public static int allExecute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         boolean isEnabled = context.getArgument("enabled", Boolean.class);
-        ModConfig.get().getStatus().getSEnable().setValue(true);
+        ModConfig.get().getStatus().getSEnable().setValue(isEnabled);
         if (isEnabled) {
             context.getSource().sendSuccess(() -> Component.literal("全局发送消息开关已被设置为打开"), true);
         } else {

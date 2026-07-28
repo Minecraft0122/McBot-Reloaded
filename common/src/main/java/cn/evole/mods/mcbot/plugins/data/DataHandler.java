@@ -6,7 +6,7 @@ import cn.evole.mods.mcbot.api.data.UserInfoApi;
 import com.github.houbb.csv.util.CsvHelper;
 import com.google.common.collect.Maps;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Project: McBot
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class DataHandler {
     public static void load(){
         ChatRecordApi.chatRecords = Maps.newConcurrentMap();
-        UserInfoApi.userInfos = new ArrayList<>();
+        UserInfoApi.userInfos = new CopyOnWriteArrayList<>();
 
         if (ChatRecordApi.chatRecordFile.toFile().exists()) {
             CsvHelper.read(ChatRecordApi.chatRecordFile.toFile(), ChatRecord.class).forEach(chatRecord -> ChatRecordApi.chatRecords.putIfAbsent(chatRecord.getMessageId(), chatRecord));

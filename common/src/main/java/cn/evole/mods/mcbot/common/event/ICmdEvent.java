@@ -30,7 +30,6 @@ public class ICmdEvent {
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.literal("connect")
                                 .executes(ConnectCommand::commonExecute)
-                                .then(Commands.literal("local").executes(ConnectCommand::localExecute))
                                 .then(Commands.argument("parameter", StringArgumentType.greedyString())
                                         .executes(ConnectCommand::execute)
                                 )
@@ -40,9 +39,6 @@ public class ICmdEvent {
                         .then(Commands.literal("disconnect").executes(DisconnectCommand::execute))
 
                         .then(Commands.literal("help").executes(HelpCommand::execute))
-                        .then(Commands.literal("recall")
-                                .then(Commands.argument("MessageId", IntegerArgumentType.integer())
-                                        .executes(RecallCommand::execute)))
                         .then(Commands.literal("addBind")
                                 .then(Commands.argument("GroupId", LongArgumentType.longArg())
                                         .then(Commands.argument("QQId", LongArgumentType.longArg())

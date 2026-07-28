@@ -2,6 +2,7 @@ package cn.evole.mods.mcbot.api.cmd;
 
 import cn.evole.mods.mcbot.Constants;
 import cn.evole.mods.mcbot.api.bot.BotApi;
+import cn.evole.mods.mcbot.common.config.ModConfig;
 import cn.evole.mods.mcbot.plugins.cmd.CmdHandler;
 import cn.evole.mods.mcbot.util.CmdUtils;
 import cn.evole.onebot.sdk.event.message.GroupMessageEvent;
@@ -17,7 +18,9 @@ public class CmdApi {
 
 
     public static void invokeGroupCommand(GroupMessageEvent event, String msg) {
-        String originCmd = msg.substring(1);//去除前缀
+        String prefix = ModConfig.get().getCmd().getCmdStart().getValue();
+        if (!msg.startsWith(prefix)) return;
+        String originCmd = msg.substring(prefix.length()).trim();//去除可配置的命令前缀
 
         val user_id = String.valueOf(event.getUserId());
         val group_id = String.valueOf(event.getGroupId());
@@ -27,19 +30,35 @@ public class CmdApi {
         if (cmd == null) return;
 
         if (CmdUtils.groupAdminParse(event)) {
-            //Constants.LOGGER.info(cmd.getCmd());
-            BotApi.sendGroupMsg(event.getGroupId(), Constants.mcBotCommand.runCommand(cmd.getCmd()));//执行指令
-            if (!cmd.getAfter_cmds().isEmpty())
-                cmd.getAfter_cmds().forEach(s -> BotApi.sendGroupMsg(event.getGroupId(), Constants.mcBotCommand.runCommand(s)));
-        } else if (CmdUtils.hasPermission(group_id, user_id, cmd)) {
-            BotApi.sendGroupMsg(event.getGroupId(), Constants.mcBotCommand.runCommand(cmd.getCmd()));//执行指令
-            if (!cmd.getAfter_cmds().isEmpty()) {//连续指令是否为空
+            runAndReply(event.getGroupId(), cmd);
+            if (cmd.getAfter_cmds() != null && !cmd.getAfter_cmds().isEmpty()) {
                 cmd.getAfter_cmds().forEach(s -> {
-                    if (CmdUtils.hasPermission(group_id, user_id, CmdHandler.cmds.get(s))) {//再次检测下条指令是否有权限
-                        BotApi.sendGroupMsg(event.getGroupId(), Constants.mcBotCommand.runCommand(s));
+                    Cmd afterCommand = CmdHandler.cmds.get(s);
+                    if (afterCommand == null) BotApi.sendGroupMsg(event.getGroupId(), Constants.mcBotCommand.runCommand(s));
+                    else runAndReply(event.getGroupId(), afterCommand);
+                });
+            }
+        } else if (CmdUtils.hasPermission(group_id, user_id, cmd)) {
+            runAndReply(event.getGroupId(), cmd);
+            if (cmd.getAfter_cmds() != null && !cmd.getAfter_cmds().isEmpty()) {//连续指令是否为空
+                cmd.getAfter_cmds().forEach(s -> {
+                    Cmd afterCommand = CmdHandler.cmds.get(s);
+                    if (CmdUtils.hasPermission(group_id, user_id, afterCommand)) {//再次检测下条指令是否有权限
+                        runAndReply(event.getGroupId(), afterCommand);
                     }
                 });
             }
         }
+    }
+
+    private static void runAndReply(long groupId, Cmd cmd) {
+        String response = Constants.mcBotCommand.runCommand(cmd.getCmd());
+        if ((response == null || response.isBlank())
+                && cmd.getAnswer() != null
+                && !cmd.getAnswer().isBlank()
+                && !"NO".equalsIgnoreCase(cmd.getAnswer())) {
+            response = cmd.getAnswer();
+        }
+        BotApi.sendGroupText(groupId, response);
     }
 }

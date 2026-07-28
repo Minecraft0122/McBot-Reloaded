@@ -1,126 +1,64 @@
-<p align="center">
-    <img width="200" src="https://s2.loli.net/2022/10/02/zrebhtAKjc3GyIl.png" alt="title">  
-</p>
-<div align="center">
+# McBot Reloaded（Minecraft 1.21.1）
 
-# McBot
+McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot-11) 的 Minecraft 服务端模组，用于在 Minecraft 服务器与 QQ 群之间双向转发消息，并允许群成员查询服务器状态或执行获准的命令。
 
-_✨ 基于 [OneBot](https://github.com/howmanybots/onebot/blob/master/README.md) 协议的 我的世界 QQ机器人✨_
+本分支由 **Minecraft0122** 维护，面向 Minecraft 1.21.1。代码源自 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot)，原作者与历史贡献者署名依照 GPL-3.0-or-later 保留。
 
-</div>
-<hr>
-<p align="center">
-    <a href="https://github.com/Nova-Committee/McBot/issues"><img src="https://img.shields.io/github/issues/Nova-Committee/McBot?style=flat" alt="issues" /></a>
-    <a href="https://www.curseforge.com/minecraft/mc-mods/botconnect">
-        <img src="http://cf.way2muchnoise.eu/botconnect.svg" alt="CurseForge Download">
-    </a>
-    <img src="https://img.shields.io/badge/license-GPLV3-green" alt="License">
-    <a href="https://github.com/howmanybots/onebot"><img src="https://img.shields.io/badge/OneBot-v11-blue?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAIVBMVEUAAAAAAAADAwMHBwceHh4UFBQNDQ0ZGRkoKCgvLy8iIiLWSdWYAAAAAXRSTlMAQObYZgAAAQVJREFUSMftlM0RgjAQhV+0ATYK6i1Xb+iMd0qgBEqgBEuwBOxU2QDKsjvojQPvkJ/ZL5sXkgWrFirK4MibYUdE3OR2nEpuKz1/q8CdNxNQgthZCXYVLjyoDQftaKuniHHWRnPh2GCUetR2/9HsMAXyUT4/3UHwtQT2AggSCGKeSAsFnxBIOuAggdh3AKTL7pDuCyABcMb0aQP7aM4AnAbc/wHwA5D2wDHTTe56gIIOUA/4YYV2e1sg713PXdZJAuncdZMAGkAukU9OAn40O849+0ornPwT93rphWF0mgAbauUrEOthlX8Zu7P5A6kZyKCJy75hhw1Mgr9RAUvX7A3csGqZegEdniCx30c3agAAAABJRU5ErkJggg=="></a>  
-    <a href="https://github.com/Nova-Committee/McBot/actions/workflows/build.yml"><img src="https://github.com/Nova-Committee/McBot/actions/workflows/build.yml/badge.svg"></a>  
-</p>  
+## 下载与兼容性
 
+请从 [GitHub Releases](https://github.com/Minecraft0122/McBot-Reloaded/releases) 下载，不要下载 GitHub 自动生成的 Source code 压缩包。
 
+| 项目 | 支持范围 |
+| --- | --- |
+| Minecraft | **仅 1.21.1** |
+| Java | 21 或更高版本；构建目标为 Java 21 |
+| Fabric | Loader 0.16.10+、Fabric API 0.115.0+1.21.1 或更高的 1.21.1 版本 |
+| NeoForge | 21.1.84 或兼容的 21.1.x 版本 |
+| OneBot | OneBot 11 正向 WebSocket，支持 `ws://` 与 `wss://` |
 
+- Fabric 使用文件名以 `-fabric.jar` 结尾的产物，并安装 Fabric API。
+- NeoForge 使用文件名以 `-neoforge.jar` 结尾的产物。
+- 不要同时安装两个加载器的产物，也不要在其他 Minecraft 版本中使用这些 JAR。
+- Jupiter 配置库和 OneBot Client 已内置；Mod Menu 11.0.3+ 是 Fabric 的可选依赖。
 
-<p align="center">
-    <a href="README_EN.md">English</a> | 
-    <a href="https://github.com/Nova-Committee/McBot#%E9%95%BF%E6%9C%9F%E6%94%AF%E6%8C%81%E7%89%88%E6%9C%AC">长期支持版本</a> |
-    <a href="https://github.com/Nova-Committee/McBot#%E5%BF%AB%E9%80%9F%E5%BC%80%E5%A7%8B">快速开始</a>
-</p>
+## 安装与连接
 
-# 长期支持版本
+1. 将对应加载器的 McBot JAR 放入服务器 `mods` 目录；Fabric 还需安装 Fabric API。
+2. 启动一次服务器，生成 `mcbot/config.json` 和 `mcbot/cmds/`。
+3. 在 NapCatQQ、Lagrange.OneBot 等实现中启用 OneBot 11 正向 WebSocket。
+4. 在配置文件或游戏内命令中设置地址、机器人 QQ、令牌和互通群号。
+5. 执行 `/mcbot connect`，或启用自动连接。
 
-> Forge 1.16.5/1.18.2/1.19.2/1.20.1/1.21  
-> Fabric 1.16.5/1.18.2/1.19.2/1.20.1/1.21
+地址可以写成 `127.0.0.1:3001`、`ws://127.0.0.1:3001` 或 `wss://bot.example.com/onebot`。未写协议时自动使用 `ws://`。
 
-# 快速开始
+## 常用命令
 
-### 使用api进行请求
+| 命令 | 说明 |
+| --- | --- |
+| `/mcbot connect [地址]` | 连接 OneBot 正向 WebSocket |
+| `/mcbot disconnect` | 断开连接 |
+| `/mcbot addGroup <群号>` | 添加互通群 |
+| `/mcbot delGroup <群号>` | 删除互通群 |
+| `/mcbot setBot <QQ号>` | 设置机器人 QQ |
+| `/mcbot setAuthKey <令牌>` | 设置访问令牌 |
+| `/mcbot status` | 查看连接和功能状态 |
+| `/mcbot customs` | 列出自定义命令 |
+| `/mcbot reload` | 重新加载配置 |
 
-```java
-public class APIDemo {
-    static {
-        // 事件回调
-        McBotEvents.ON_CHAT.register((player, msgId, msg) -> System.out.printf("McBot刚刚转发一条消息。由%s发送了%s (%s)%n", player.getName().getString(), msg, msgId));
-    }
+管理命令要求 2 级权限。自定义群命令存放在 `mcbot/cmds/`，简体中文为默认语言。
 
-    /**
-     * 群里发送消息
-     * @param groupId 群号
-     * @param message 消息
-     */
-    public static void doSend(long groupId, String message) throws CommandSyntaxException {
-        Const.sendGroupMsg(groupId, message)
-    }
+## 构建
 
-    /**
-     * 撤回消息
-     * @param message_id 消息ID
-     */
-    public static void recallMessage(int message_id) {
-        JsonObject json = new Gson().fromJson(
-                String.format("{'message_id': %s}", message_id),
-                JsonObject.class);
-        Const.customRequest(ActionType.DELETE_MSG, json);
-    }
-}
+使用 JDK 21：
+
+```bash
+./gradlew clean build
 ```
 
-### 事件监听示例
+Fabric 和 NeoForge 的可安装产物分别位于 `fabric/build/libs/` 与 `neoforge/build/libs/`。每次推送和拉取请求都会由 GitHub Actions 自动测试、构建并上传产物；正式版本由仓库的统一发布流程生成。
 
-```java
-public class ListenerDemo implements Listener {
-    static OneBotClient client;
-    public static void main(String[] args) throws InterruptedException {
-        BotConfig config = new BotConfig("ws://192.168.1.25:5800", "123456");
-        client = OneBotClient.create(config, new HandlerTest()).open();//创建websocket连接实例并监听事件
-        //client.getEventsBus().register(new HandlerTest());//监听事件
-    }
+## 反馈与许可
 
-    @SubscribeEvent(internal = true)
-    public void msg1(GroupMessageEvent event){//监听群聊消息
-        System.out.println(event.getMessage());//打印消息
-        System.out.println(event.getRawMessage());//打印原始消息
-    }
-}
-```
+问题请提交到 [Minecraft0122/McBot-Reloaded Issues](https://github.com/Minecraft0122/McBot-Reloaded/issues)，并附上 Minecraft、Java、加载器、McBot 版本、完整日志和脱敏配置。
 
-# 支持
-
-McBot 以 [OneBot-v11](https://github.com/howmanybots/onebot/tree/master/v11/specs)
-标准协议进行开发，兼容所有支持正向WebSocket的OneBot协议端
-| 项目地址                                                                              | 核心作者           | 备注                                                                    |
-|-----------------------------------------------------------------------------------|----------------|-----------------------------------------------------------------------|
-| [Overflow](https://github.com/MrXiaoM/Overflow)                                   | MrXiaoM        | 实现 mirai 的无缝迁移                                                        |
-| [Lagrange.Core](https://github.com/LagrangeDev/Lagrange.Core)                     | NepPure        | C#实现 By Konata.Core                                                   |
-| [OpenShamrock](https://github.com/whitechi73/OpenShamrock)                        | whitechi73     | Xposed框架hook实现                                                        |
-| [Gensokyo](https://github.com/Hoshinonyaruko/Gensokyo)                            | Hoshinonyaruko | 基于官方api 轻量 原生跨平台                                                      |
-| [LLOnebot](https://github.com/LLOneBot/LLOneBot)                                  | linyuchen      | 使用[LiteLoaderQQNT](https://github.com/LiteLoaderQQNT/LiteLoaderQQNT)  |
-| [NapCatQQ](https://github.com/NapNeko/NapCatQQ)                                   | MliKiowa | 基于NTQQ的无头Bot框架  |
-| [OneBot-Mirai](https://github.com/cnlimiter/onebot-mirai)                                   | cnlimiter | Mirai的onebot协议实现  |
-
-# Credits
-
-* [OneBot](https://github.com/botuniverse/onebot)
-
-# 开源许可
-
-This product is licensed under the GNU General Public License version 3. The license is as published by the Free
-Software Foundation published at https://www.gnu.org/licenses/gpl-3.0.html.
-
-Alternatively, this product is licensed under the GNU Lesser General Public License version 3 for non-commercial use.
-The license is as published by the Free Software Foundation published at https://www.gnu.org/licenses/lgpl-3.0.html.
-
-Feel free to contact us if you have any questions about licensing or want to use the library in a commercial closed
-source product.
-
-# 致谢
-
-Thanks to [JetBrains](https://www.jetbrains.com/?from=mcbot) for allocating free open-source licences for IDEs such as [IntelliJ IDEA](https://www.jetbrains.com/idea/?from=mcbot)  
-[<img src=".github/jetbrains-variant-3.png" width="200"/>](https://www.jetbrains.com/?from=mcbot)
-
-## 星星（要要）~⭐
-
-[![Stargazers over time](https://starchart.cc/Nova-Committee/McBot.svg)](https://starchart.cc/Nova-Committee/McBot)
-
-
+项目依据 [GNU GPL 3.0 或更高版本](LICENSE) 发布。感谢原作者 cnlimiter、Nova Committee 与所有历史贡献者。

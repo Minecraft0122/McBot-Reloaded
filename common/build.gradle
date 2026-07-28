@@ -12,4 +12,5 @@ dependencies {
     modImplementation ("curse.maven:jupiter-1072905:$jupiter_fabric_version")
     compileOnly ("org.projectlombok:lombok:$lombok_version")
     annotationProcessor ("org.projectlombok:lombok:$lombok_version")
+    testImplementation ("org.junit.jupiter:junit-jupiter:5.10.2")
 }
