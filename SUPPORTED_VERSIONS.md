@@ -15,16 +15,17 @@
 
 ## 兼容维护与历史源码
 
-下列版本在仓库中已有实现。它们会纳入定期构建巡检，但在完成一次干净环境构建和关键回归验证前，不作为 3.0.0 正式 Release 资产推荐给普通用户。
+下列版本在仓库中已有实现。选定的回归目标会由 GitHub Actions 定期构建；即使已通过构建，在完成真实服务端关键回归前也只通过 Actions 提供维护产物，不作为 3.0.0 正式 Release 资产推荐给普通用户。
 
 | Minecraft | 已有加载器实现 | 通常所需 Java | 源码位置/说明 |
 | --- | --- | --- | --- |
-| 1.7.10 | Forge | 8；GTNH 的 Java 21 环境另行兼容验证 | `1.7.10`，已通过 Java 8 干净构建；群号解析、OneBot 数组消息和 WSS 已修复 |
+| 1.7.10 | Forge | 8；GTNH 的 Java 21 环境另行兼容验证 | `1.7.10`，本地与 GitHub Actions 干净构建均通过；群号解析、OneBot 数组消息和 WSS 已修复 |
 | 1.12.2 | Forge | 8 | `1.12.2`，旧版 OneBot SDK 0.1.4 上游制品已失效，暂不发布二进制文件 |
 | 1.14.4、1.15.2、1.17.1 | Fabric/Forge 开发实现 | 8/16 | `fabric-dev`、`forge-dev`，历史开发级支持 |
-| 1.16.5 | Fabric、Forge | 8 | `fabric`、`forge`，正在核对内置 OneBot 依赖 |
-| 1.18.2 | Fabric、Forge；另有 Quilt 实验分支 | 17 | `fabric`、`forge`、`1.18-quilt` |
-| 1.19.2 | Fabric、Forge | 17 | `fabric`、`forge`，正在回移 WSS 与停服修复 |
+| 1.16.5 | Fabric | 8 | `fabric`，已通过聚合预处理编译；尚未作为独立正式 Release 回归 |
+| 1.16.5 | Forge | 8 | `forge`，本地与 GitHub Actions 完整构建均通过；OneBot 与 AtomConfig 已打入最终 JAR |
+| 1.18.2 | Fabric、Forge；另有 Quilt 实验分支 | 17 | `fabric`、`forge` 的预处理编译通过；`1.18-quilt` 仍为实验实现 |
+| 1.19.2 | Fabric、Forge | 17 | `fabric`、`forge`，WSS、首次连接、重连和停服修复已回移；两种加载器均通过本地与 GitHub Actions 完整构建 |
 | 1.19.3、1.19.4 | Fabric、Forge | 17 | `fabric`、`forge` |
 | 1.20.2 | Fabric/Forge 开发实现 | 17 | `fabric-dev`、`forge-dev`，历史开发级支持 |
 | 1.20.4 | Fabric | 17 | `fabric` |
