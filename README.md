@@ -2,7 +2,7 @@
 
 McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot-11) 协议的 Minecraft 服务端模组，用于在 Minecraft 服务器与 QQ 群之间转发消息，并允许群成员查询服务器状态或执行获准的自定义命令。
 
-本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。项目基于 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot) 继续维护。
+本项目由 **Minecraft0122** 继续维护；本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。代码源自 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot)，原作者与历史贡献者署名依照 GPL-3.0-or-later 保留。
 
 ## 下载
 
@@ -33,7 +33,7 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 | Forge | 47.3.12 至 47.x | 47.3.12 |
 | OneBot | OneBot 11 正向 WebSocket | OneBot Client 0.4.3 |
 
-本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。Jupiter 配置库和 OneBot Client 已打包进模组，用户无需单独安装。Fabric 环境必须安装 Fabric API；Mod Menu 7.2.2 或更高版本是可选依赖。
+本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。其他 Minecraft 版本的维护等级、加载器与 Java 要求见 [支持版本表](SUPPORTED_VERSIONS.md)，不同版本的 JAR 不能混用。Jupiter 配置库和 OneBot Client 已打包进模组，用户无需单独安装。Fabric 环境必须安装 Fabric API；Mod Menu 7.2.2 或更高版本是可选依赖。
 
 这是服务端模组：专用服务器的普通玩家客户端无需安装。若在客户端或单人游戏中安装，模组仍可加载，并可通过 Mod Menu 使用配置界面。
 
@@ -47,7 +47,7 @@ OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQ
 4. 修改 `mcbot/config.json` 中的机器人地址、QQ 号、令牌和互通群号，或在游戏内使用 `/mcbot` 命令配置。
 5. 执行 `/mcbot connect`。若未启用自动连接，也可执行 `/mcbot connect <主机:端口>`。
 
-默认 WebSocket 地址为 `127.0.0.1:18082`。地址可带或不带 `ws://` 前缀；模组会自动补全。
+默认 WebSocket 地址为 `127.0.0.1:18082`。地址可带或不带 `ws://` 前缀，也支持 `wss://` 加密连接；模组会自动补全普通 WebSocket 协议。
 
 ## 常用命令
 
@@ -93,14 +93,14 @@ Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/b
 
 ## 自动发布
 
-向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致的标签即可自动发布。例如 `mod_version=2.3.1` 时：
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.0` 时：
 
 ```bash
-git tag v2.3.1
-git push origin v2.3.1
+git tag 3.0.0
+git push origin 3.0.0
 ```
 
-自动发布会在干净环境中运行全部测试，构建 Fabric 与 Forge 正式 JAR，生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
+自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
 
 ## 反馈问题
 
@@ -109,6 +109,8 @@ git push origin v2.3.1
 - [本项目问题列表](https://github.com/Minecraft0122/McBot-Reloaded/issues)
 - [上游问题列表](https://github.com/Nova-Committee/McBot/issues)
 - [上游开放问题梳理](UPSTREAM_ISSUES.md)
+- [上游拉取请求梳理](UPSTREAM_PULLS.md)
+- [全部支持版本](SUPPORTED_VERSIONS.md)
 
 ## 致谢与许可
 

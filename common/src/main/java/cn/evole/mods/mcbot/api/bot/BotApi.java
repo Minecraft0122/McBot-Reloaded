@@ -10,6 +10,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Project: McBot
@@ -18,12 +20,42 @@ import java.util.concurrent.Callable;
  * @Description:
  */
 public class BotApi {
+    private static final int MAX_GROUP_TEXT_LENGTH = 3500;
+
     public static void sendGroupMsg(long group_id, String message) {
         MsgThreadUtils.INSTANCE.submit(group_id, message, false);
     }
 
     public static void sendGroupMsg(long group_id, Callable<String> message) {
         MsgThreadUtils.INSTANCE.submit(group_id, message, false);
+    }
+
+    /**
+     * 发送来自服务器命令的纯文本。自动转义可避免方括号、健康报告和
+     * Spark 输出被 OneBot 当作不完整 CQ 码；过长内容会按行分段。
+     */
+    public static void sendGroupText(long groupId, String message) {
+        for (String part : splitGroupText(message, MAX_GROUP_TEXT_LENGTH)) {
+            MsgThreadUtils.INSTANCE.submit(groupId, part, true);
+        }
+    }
+
+    static List<String> splitGroupText(String message, int maximumLength) {
+        List<String> parts = new ArrayList<>();
+        if (message == null || message.isBlank()) return parts;
+        if (maximumLength < 1) throw new IllegalArgumentException("消息分段长度必须大于零");
+
+        int start = 0;
+        while (start < message.length()) {
+            int end = Math.min(message.length(), start + maximumLength);
+            if (end < message.length()) {
+                int newline = message.lastIndexOf('\n', end - 1);
+                if (newline >= start) end = newline + 1;
+            }
+            parts.add(message.substring(start, end));
+            start = end;
+        }
+        return parts;
     }
 
     public static void sendAllGroupMsg(String message) {

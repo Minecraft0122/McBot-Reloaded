@@ -5,7 +5,8 @@
     "name": "${mod_name}",
     "description": "${description}",
     "authors": [
-        "${mod_author}"
+        "${mod_author}",
+        "${mod_maintainer}"
     ],
     "contact": {
         "sources": "https://github.com/Minecraft0122/McBot-Reloaded",

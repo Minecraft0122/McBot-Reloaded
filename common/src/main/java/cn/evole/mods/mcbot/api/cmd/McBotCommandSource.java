@@ -16,18 +16,25 @@ import net.minecraft.world.phys.Vec3;
  */
 public class McBotCommandSource implements CommandSource {
     private static final Component MCBOT_COMPONENT = Component.literal("McBot");
+    private static final long INITIAL_ASYNC_WAIT_MILLIS = 1500;
+    private static final long RESPONSE_SETTLE_MILLIS = 200;
+    private static final long MAX_ASYNC_WAIT_MILLIS = 5000;
     private final StringBuffer buffer = new StringBuffer();
     private final MinecraftServer server;
+    private long responseRevision;
+    private long lastResponseNanos;
 
     public McBotCommandSource(MinecraftServer server) {
         this.server = server;
     }
 
-    public void prepareForCommand() {
+    public synchronized void prepareForCommand() {
         this.buffer.setLength(0);
+        this.responseRevision = 0;
+        this.lastResponseNanos = 0;
     }
 
-    public String getCommandResponse() {
+    public synchronized String getCommandResponse() {
         return this.buffer.toString();
     }
 
@@ -37,9 +44,12 @@ public class McBotCommandSource implements CommandSource {
     }
 
     @Override
-    public void sendSystemMessage(Component component) {
+    public synchronized void sendSystemMessage(Component component) {
         if (!this.buffer.isEmpty()) this.buffer.append('\n');
         this.buffer.append(component.getString());
+        this.responseRevision++;
+        this.lastResponseNanos = System.nanoTime();
+        this.notifyAll();
     }
 
     @Override
@@ -58,9 +68,36 @@ public class McBotCommandSource implements CommandSource {
     }
 
     public synchronized String runCommand(String cmd) {
-        this.prepareForCommand();
-        server.executeBlocking(() -> server.getCommands().performPrefixedCommand(this.createCommandSourceStack(), cmd));
-        return this.getCommandResponse();
+        McBotCommandSource invocation = new McBotCommandSource(this.server);
+        server.executeBlocking(() -> server.getCommands().performPrefixedCommand(invocation.createCommandSourceStack(), cmd));
+        return invocation.awaitCommandResponse(INITIAL_ASYNC_WAIT_MILLIS, RESPONSE_SETTLE_MILLIS, MAX_ASYNC_WAIT_MILLIS);
+    }
+
+    synchronized String awaitCommandResponse(long initialWaitMillis, long settleMillis, long maxWaitMillis) {
+        if (initialWaitMillis < 0 || settleMillis < 0 || maxWaitMillis < initialWaitMillis) {
+            throw new IllegalArgumentException("命令响应等待参数无效");
+        }
+
+        long started = System.nanoTime();
+        long initialDeadline = started + initialWaitMillis * 1_000_000L;
+        long maximumDeadline = started + maxWaitMillis * 1_000_000L;
+        while (true) {
+            long now = System.nanoTime();
+            long deadline = responseRevision == 0
+                    ? initialDeadline
+                    : Math.min(maximumDeadline, lastResponseNanos + settleMillis * 1_000_000L);
+            long remainingNanos = deadline - now;
+            if (remainingNanos <= 0) break;
+
+            try {
+                long waitMillis = Math.max(1, (remainingNanos + 999_999L) / 1_000_000L);
+                this.wait(waitMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+        return this.buffer.toString();
     }
 
 }

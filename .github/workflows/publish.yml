@@ -3,7 +3,7 @@ name: '自动发布'
 on:
   push:
     tags:
-      - 'v*'
+      - '[0-9]*.[0-9]*.[0-9]*'
 
 permissions:
   contents: write
@@ -15,21 +15,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: '验证、构建并发布'
+  build:
+    name: '构建 Minecraft ${{ matrix.minecraft }}'
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - minecraft: '1.20.1'
+            ref: '1.20.1'
+            java: '17'
+            loaders: 'fabric|forge'
+          - minecraft: '1.21.1'
+            ref: '1.21.1'
+            java: '21'
+            loaders: 'fabric|neoforge'
 
     steps:
-      - name: '检出仓库'
+      - name: '检出版本分支'
         uses: actions/checkout@v7
         with:
+          ref: ${{ matrix.ref }}
           fetch-depth: 0
 
-      - name: '配置 JDK 17'
+      - name: '配置 JDK ${{ matrix.java }}'
         uses: actions/setup-java@v5
         with:
-          java-version: '17'
+          java-version: ${{ matrix.java }}
           distribution: 'temurin'
 
       - name: '配置 Gradle'
@@ -37,51 +50,83 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: '校验标签与模组版本'
+      - name: '校验标签、模组版本与 Minecraft 版本'
         shell: pwsh
         run: |
           $versionLine = Select-String -Path gradle.properties -Pattern '^mod_version=(.+)$'
-          if (-not $versionLine) {
-            throw 'gradle.properties 中缺少 mod_version'
+          $minecraftLine = Select-String -Path gradle.properties -Pattern '^minecraft_version=(.+)$'
+          if (-not $versionLine -or -not $minecraftLine) {
+            throw 'gradle.properties 中缺少 mod_version 或 minecraft_version'
           }
           $modVersion = $versionLine.Matches[0].Groups[1].Value.Trim()
-          $expectedTag = "v$modVersion"
-          if ($env:GITHUB_REF_NAME -ne $expectedTag) {
-            throw "标签 $env:GITHUB_REF_NAME 与 mod_version=$modVersion 不一致；应使用 $expectedTag"
+          $minecraftVersion = $minecraftLine.Matches[0].Groups[1].Value.Trim()
+          if ($env:GITHUB_REF_NAME -ne $modVersion) {
+            throw "标签 $env:GITHUB_REF_NAME 与 mod_version=$modVersion 不一致"
           }
-          "MOD_VERSION=$modVersion" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          if ($minecraftVersion -ne '${{ matrix.minecraft }}') {
+            throw "分支 Minecraft 版本 $minecraftVersion 与发布矩阵 ${{ matrix.minecraft }} 不一致"
+          }
 
       - name: '运行测试并构建全部加载器'
         shell: pwsh
         run: .\gradlew.bat clean build --no-daemon --stacktrace
 
-      - name: '整理产物并生成 SHA-256 校验和'
+      - name: '整理可安装产物'
         shell: pwsh
+        env:
+          LOADER_PATTERN: ${{ matrix.loaders }}
         run: |
           New-Item -ItemType Directory -Path release | Out-Null
-          $fabric = @(Get-ChildItem fabric/build/libs/*-fabric.jar -File)
-          $forge = @(Get-ChildItem forge/build/libs/*-forge.jar -File)
-          if ($fabric.Count -ne 1 -or $forge.Count -ne 1) {
-            throw "预期各有一个 Fabric 和 Forge 正式 JAR，实际为 Fabric=$($fabric.Count)、Forge=$($forge.Count)"
+          $jars = @(Get-ChildItem -Path fabric,forge,neoforge -Filter *.jar -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.DirectoryName -like '*build\libs' -and $_.Name -match "-($env:LOADER_PATTERN)\.jar$" })
+          if ($jars.Count -ne 2) {
+            throw "Minecraft ${{ matrix.minecraft }} 预期有两个正式 JAR，实际为 $($jars.Count)：$($jars.Name -join ', ')"
           }
-          Copy-Item $fabric[0].FullName, $forge[0].FullName -Destination release
-          Get-ChildItem release/*.jar -File | Sort-Object Name | ForEach-Object {
-            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$hash  $($_.Name)"
-          } | Out-File release/SHA256SUMS.txt -Encoding ascii
+          Copy-Item $jars.FullName -Destination release
 
       - name: '生成构建来源证明'
         uses: actions/attest@v4
         with:
           subject-path: 'release/*.jar'
 
-      - name: '保存发布产物'
+      - name: '上传版本产物'
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
-          name: McBot-v${{ env.MOD_VERSION }}
+          name: release-${{ matrix.minecraft }}
           retention-days: 30
+          path: release/*.jar
+
+  release:
+    name: '汇总并创建 GitHub Release'
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: '检出发布提交'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: '下载全部版本产物'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: release-*
           path: release/
+          merge-multiple: true
+
+      - name: '生成 SHA-256 校验和'
+        shell: pwsh
+        run: |
+          $jars = @(Get-ChildItem release/*.jar -File | Sort-Object Name)
+          if ($jars.Count -ne 4) {
+            throw "预期汇总四个正式 JAR，实际为 $($jars.Count)"
+          }
+          $jars | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          } | Out-File release/SHA256SUMS.txt -Encoding ascii
 
       - name: '创建版本发布'
         shell: pwsh
@@ -92,4 +137,4 @@ jobs:
           gh release create $env:GITHUB_REF_NAME $assets `
             --verify-tag `
             --generate-notes `
-            --title "McBot $env:MOD_VERSION（Minecraft 1.20.1）"
+            --title "McBot $env:GITHUB_REF_NAME"

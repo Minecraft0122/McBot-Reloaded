@@ -2,6 +2,29 @@
 
 本文件记录 McBot 的重要变更。历史内容整理自上游提交记录。
 
+## [3.0.0](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.0) - 2026-07-28
+
+### 版本与维护
+
+- 模组版本从 3.0.0 重新编号，新标签不再使用 `v`、`release` 等前缀。
+- 正式维护 Minecraft 1.20.1 Fabric/Forge 与 1.21.1 Fabric/NeoForge，四个组合均通过单元测试和完整构建。
+- 当前维护者和作者列表增加 Minecraft0122，仓库联系信息、问题入口、CODEOWNERS 和发布地址统一到 Minecraft0122/McBot-Reloaded。
+- 保留 GPL-3.0-or-later、原作者 cnlimiter、Nova Committee、历史贡献者署名和 Git 历史。
+
+### 修复
+
+- 吸收上游 PR #197，支持 `wss://`、`ws://` 和无协议 OneBot 地址，并拒绝 HTTP 等错误协议。
+- 修复 Minecraft 1.21.1 中无展示信息的进度触发 `Optional` 空值并崩服（上游 #187、#190、#196）。
+- 命令响应使用独立捕获对象并有界等待异步输出，避免 Spark/TabTPS 结果为空或串到下一条命令（上游 #79、#115）。
+- 服务器命令结果以纯文本发送并按行安全分段，避免复杂健康报告被误解析为 CQ 码（上游 #159）。
+- 将 2.3.1 的群名片、`@`、换行、删群、空回复、绑定、权限、数据和停服修复移植到 1.21.1。
+
+### 构建与发布
+
+- 产物统一命名为 `McBot-<Minecraft>-3.0.0-<加载器>.jar`。
+- `3.0.0` 标签自动从两个正式版本分支构建四个可安装 JAR，生成 SHA-256 校验和与构建来源证明并创建 GitHub Release。
+- 新增现有版本、全部上游 issue 和全部上游 PR 的中文维护矩阵。
+
 ## [2.3.1](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/v2.3.1) - 2026-07-27
 
 ### 修复

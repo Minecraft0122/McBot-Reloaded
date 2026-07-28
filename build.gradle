@@ -10,7 +10,7 @@ architectury {
 
 allprojects {
     group = rootProject.maven_group
-    version = "${rootProject.minecraft_version}+${rootProject.mod_version}+${rootProject.mod_version_label}"
+    version = "${rootProject.minecraft_version}-${rootProject.mod_version}"
 }
 
 subprojects {
@@ -88,6 +88,7 @@ subprojects {
                 "modmenu_version"               : modmenu_version,
                 "mod_name"                     : mod_name,
                 "mod_author"                   : mod_author,
+                "mod_maintainer"               : mod_maintainer,
                 "mod_id"                       : mod_id,
                 "license"                      : license,
                 "description"                  : project.description,

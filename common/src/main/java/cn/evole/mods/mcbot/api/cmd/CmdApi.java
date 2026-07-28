@@ -59,6 +59,6 @@ public class CmdApi {
                 && !"NO".equalsIgnoreCase(cmd.getAnswer())) {
             response = cmd.getAnswer();
         }
-        BotApi.sendGroupMsg(groupId, response);
+        BotApi.sendGroupText(groupId, response);
     }
 }

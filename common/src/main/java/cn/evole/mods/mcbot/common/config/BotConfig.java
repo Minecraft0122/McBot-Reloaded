@@ -31,9 +31,33 @@ public class BotConfig extends AutoInitConfigCategoryBase {
 
     public cn.evole.onebot.client.core.BotConfig build() {
         return new cn.evole.onebot.client.core.BotConfig(
-                url.getValue().startsWith("ws://") ? url.getValue() : "ws://" + url.getValue()
+                normalizeWebSocketUrl(url.getValue())
                 , token.getValue(), Long.parseLong(botId.getValue()), token.getValue().startsWith("mirai_"),
                 reconnect.getValue(), reconnectInterval.getValue(), reconnectMaxTimes.getValue());
+    }
+
+    /**
+     * 规范化 OneBot 正向 WebSocket 地址。
+     *
+     * @param value 带或不带协议的地址
+     * @return 使用 {@code ws://} 或 {@code wss://} 的地址
+     */
+    public static String normalizeWebSocketUrl(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("OneBot WebSocket 地址不能为空");
+        }
+
+        String url = value.trim();
+        if (url.regionMatches(true, 0, "wss://", 0, 6)) {
+            return "wss://" + url.substring(6);
+        }
+        if (url.regionMatches(true, 0, "ws://", 0, 5)) {
+            return "ws://" + url.substring(5);
+        }
+        if (url.matches("^[A-Za-z][A-Za-z0-9+.-]*://.*$")) {
+            throw new IllegalArgumentException("OneBot 地址只支持 ws:// 或 wss:// 协议");
+        }
+        return "ws://" + url;
     }
 
 }
