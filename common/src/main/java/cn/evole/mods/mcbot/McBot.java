@@ -25,6 +25,11 @@ public class McBot {
             return;
         }
 
+        LOGGER.info("McBot Java 运行环境：{}（{}；{}）",
+                Runtime.version(),
+                System.getProperty("java.vendor"),
+                System.getProperty("java.vm.name"));
+
         try {
             ConfigManager.getInstance().registerConfigHandler(ModConfig.INSTANCE);
             ServerConfigManager.registerServerConfig(ModConfig.INSTANCE, ServerConfigManager.PermissionChecker.IS_OPERATOR);
