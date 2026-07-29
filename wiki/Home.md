@@ -21,7 +21,7 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 
 Fabric 版本已经内置配置核心并改用原版 Mixin 事件，不需要 Fabric API、Jupiter 或其他前置模组。不同 Minecraft 版本和加载器的 JAR 不能混用。
 
-Java 21、25 会在 GitHub Actions 中分别启动所有四种正式服务端组合，确认 McBot 已加载后正常关服。1.20.1 仍以 Java 17 为最低版本和编译目标，1.21.1 仍以 Java 21 为最低版本和编译目标。
+GitHub Actions 会对 1.20.1 使用 Java 17、21、25，对 1.21.1 使用 Java 21、25，逐一启动所有正式加载器服务端，确认 McBot 已加载后正常关服。1.20.1 仍以 Java 17 为最低版本和编译目标，1.21.1 仍以 Java 21 为最低版本和编译目标。
 
 ## 主要功能
 
@@ -31,6 +31,8 @@ Java 21、25 会在 GitHub Actions 中分别启动所有四种正式服务端组
 - 可配置群命令、权限、玩家绑定和聊天记录。
 - 简体中文、繁体中文和英文语言资源。
 - 自动测试、构建、生成 SHA-256 校验文件和 GitHub Release。
+
+测试、合并与发布所必须满足的矩阵和通过条件见 [GitHub 测试规范](Testing-Standard)。
 
 ## 当前状态
 

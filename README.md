@@ -36,7 +36,7 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 
 本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。其他 Minecraft 版本的维护等级、加载器与 Java 要求见 [支持版本表](SUPPORTED_VERSIONS.md)，不同版本的 JAR 不能混用。配置核心和 OneBot Client 已打包进模组，Fabric、Forge 均不需要额外前置模组；Mod Menu 7.2.2 或更高版本仅用于可选的客户端配置界面。
 
-Java 17 是 1.20.1 的最低运行版本和构建基准。Java 21、25 会在每次正式分支变更时分别启动 Fabric、Forge 专用服务器，确认 McBot 已加载后执行正常关服；Java 18—20、22—24 没有纳入持续兼容矩阵，不作同等级保证。使用 Java 25 时必须安装表中的最低加载器版本，旧版加载器可能在 McBot 初始化前就无法读取 Java 25 类文件。
+Java 17 是 1.20.1 的最低运行版本和构建基准。Java 17、21、25 会在每次正式分支变更时分别启动 Fabric、Forge 专用服务器，确认 McBot 已加载后执行正常关服；Java 18—20、22—24 没有纳入持续兼容矩阵，不作同等级保证。使用 Java 25 时必须安装表中的最低加载器版本，旧版加载器可能在 McBot 初始化前就无法读取 Java 25 类文件。
 
 这是服务端模组：专用服务器的普通玩家客户端无需安装。若在客户端或单人游戏中安装，模组仍可加载，并可通过 Mod Menu 使用配置界面。
 
@@ -94,7 +94,9 @@ OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQ
 ./gradlew clean build
 ```
 
-Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/build/libs/` 和 `forge/build/libs/`。Java 21、25 是服务端运行兼容目标，不应直接替代本分支的 Gradle 基准 JDK；GitHub Actions 会把构建 JDK 与服务端运行 JDK 分离验证。
+Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/build/libs/` 和 `forge/build/libs/`。GitHub Actions 会把构建 JDK 与服务端运行 JDK 分离，并使用 Java 17、21、25 分别完成真实服务端验证。
+
+测试任务、通过条件、证据保留和发布门禁以仓库中的 [GitHub 测试规范](TESTING_STANDARD.md) 为准。本地测试仅用于开发反馈，GitHub Actions 的 `质量门禁` 是合并和发布的正式依据。
 
 ## 自动发布
 
@@ -105,7 +107,7 @@ git tag 3.0.4
 git push origin 3.0.4
 ```
 
-自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
+自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，并重新执行十组正式 Java 运行矩阵。全部通过后才会上传四个正式 JAR、生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致或任一运行测试失败时会拒绝发布；开发包和源码包不会作为 Release 附件上传。
 
 ## 反馈问题
 

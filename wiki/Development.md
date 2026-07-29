@@ -57,7 +57,7 @@ forge/build/libs/
 .\gradlew.bat clean test build --no-daemon --stacktrace
 ```
 
-正式分支的 GitHub Actions 还会对每个正式加载器分别使用 Java 21、25 启动专用服务器。Gradle 保持运行在 Minecraft 对应的基准 JDK 上并生成正式重映射 JAR，测试脚本随后安装官方 Fabric、Forge 或 NeoForge 服务端，再由待测 JDK 启动生产形态的 JAR；测试要求服务端启动到 `Done`、日志确认 McBot 的实际 Java 主版本，并通过 `stop` 正常退出，同时拒绝常见字节码、反射和链接错误。
+正式分支的 GitHub Actions 还会对每个正式加载器启动专用服务器：Minecraft 1.20.1 使用 Java 17、21、25，Minecraft 1.21.1 使用 Java 21、25。Gradle 保持运行在 Minecraft 对应的基准 JDK 上并生成正式重映射 JAR，测试脚本随后安装官方 Fabric、Forge 或 NeoForge 服务端，再由待测 JDK 启动生产形态的 JAR；测试要求服务端启动到 `Done`、日志确认 McBot 的实际 Java 主版本，并通过 `stop` 正常退出，同时拒绝常见字节码、反射和链接错误。完整要求见 [GitHub 测试规范](Testing-Standard)。
 
 ## 代码质量约定
 

@@ -1,22 +1,22 @@
-name: '自动发布'
+name: '全版本巡检'
 
 on:
-  push:
-    tags:
-      - '[0-9]*.[0-9]*.[0-9]*'
+  workflow_dispatch:
+  schedule:
+    # 每周一 02:00（北京时间）运行，cron 使用 UTC。
+    - cron: '0 18 * * 0'
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
+  issues: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: repository-test-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
-    name: '构建 Minecraft ${{ matrix.minecraft }}'
+    name: '${{ matrix.minecraft }} 编译、单元测试与全加载器构建'
     runs-on: windows-latest
     timeout-minutes: 35
     strategy:
@@ -33,13 +33,12 @@ jobs:
             loaders: 'fabric|neoforge'
 
     steps:
-      - name: '检出版本分支'
+      - name: '检出 ${{ matrix.ref }} 分支'
         uses: actions/checkout@v7
         with:
           ref: ${{ matrix.ref }}
-          fetch-depth: 0
 
-      - name: '配置 JDK ${{ matrix.java }}'
+      - name: '配置构建 JDK ${{ matrix.java }}'
         uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java }}
@@ -50,55 +49,32 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: '校验标签、模组版本与 Minecraft 版本'
-        shell: pwsh
-        run: |
-          $versionLine = Select-String -Path gradle.properties -Pattern '^mod_version=(.+)$'
-          $minecraftLine = Select-String -Path gradle.properties -Pattern '^minecraft_version=(.+)$'
-          if (-not $versionLine -or -not $minecraftLine) {
-            throw 'gradle.properties 中缺少 mod_version 或 minecraft_version'
-          }
-          $modVersion = $versionLine.Matches[0].Groups[1].Value.Trim()
-          $minecraftVersion = $minecraftLine.Matches[0].Groups[1].Value.Trim()
-          if ($env:GITHUB_REF_NAME -ne $modVersion) {
-            throw "标签 $env:GITHUB_REF_NAME 与 mod_version=$modVersion 不一致"
-          }
-          if ($minecraftVersion -ne '${{ matrix.minecraft }}') {
-            throw "分支 Minecraft 版本 $minecraftVersion 与发布矩阵 ${{ matrix.minecraft }} 不一致"
-          }
-
       - name: '运行测试并构建全部加载器'
         shell: pwsh
         run: .\gradlew.bat clean build --no-daemon --stacktrace
 
-      - name: '整理可安装产物'
-        shell: pwsh
-        env:
-          LOADER_PATTERN: ${{ matrix.loaders }}
-        run: |
-          New-Item -ItemType Directory -Path release | Out-Null
-          $jars = @(Get-ChildItem -Path fabric,forge,neoforge -Filter *.jar -File -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.DirectoryName -like '*build\libs' -and $_.Name -match "-($env:LOADER_PATTERN)\.jar$" })
-          if ($jars.Count -ne 2) {
-            throw "Minecraft ${{ matrix.minecraft }} 预期有两个正式 JAR，实际为 $($jars.Count)：$($jars.Name -join ', ')"
-          }
-          Copy-Item $jars.FullName -Destination release
-
-      - name: '生成构建来源证明'
-        uses: actions/attest@v4
-        with:
-          subject-path: 'release/*.jar'
-
-      - name: '上传版本产物'
+      - name: '上传正式 JAR'
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: error
-          name: release-${{ matrix.minecraft }}
-          retention-days: 30
-          path: release/*.jar
+          name: weekly-${{ matrix.minecraft }}-${{ github.run_id }}
+          retention-days: 14
+          path: |
+            fabric/build/libs/*-fabric.jar
+            forge/build/libs/*-forge.jar
+            neoforge/build/libs/*-neoforge.jar
+
+      - name: '上传单元测试报告'
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          if-no-files-found: ignore
+          name: weekly-test-reports-${{ matrix.minecraft }}-${{ github.run_id }}
+          retention-days: 7
+          path: common/build/reports/tests/
 
   java-runtime:
-    name: '发布门禁 / ${{ matrix.minecraft }} / ${{ matrix.loader }} / Java ${{ matrix.java }}'
+    name: '${{ matrix.minecraft }} / ${{ matrix.loader }} / Java ${{ matrix.java }} 服务端测试'
     runs-on: windows-latest
     timeout-minutes: 35
     strategy:
@@ -197,7 +173,7 @@ jobs:
         shell: pwsh
         run: .\gradlew.bat ':${{ matrix.loader }}:remapJar' --no-daemon --stacktrace
 
-      - name: '使用 Java ${{ matrix.java }} 启动并关闭真实服务端'
+      - name: '安装、启动并正常关闭真实服务端'
         shell: pwsh
         run: >-
           .\.github\scripts\test-java-runtime.ps1
@@ -206,57 +182,88 @@ jobs:
           -LoaderVersion '${{ matrix.loader_version }}'
           -ExpectedJava ${{ matrix.java }}
 
-      - name: '上传发布门禁日志'
+      - name: '上传服务端日志'
         if: always()
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: ignore
-          name: release-java-${{ matrix.minecraft }}-${{ matrix.java }}-${{ matrix.loader }}-${{ github.sha }}
-          retention-days: 30
+          name: weekly-${{ matrix.minecraft }}-java-${{ matrix.java }}-${{ matrix.loader }}-logs-${{ github.run_id }}
+          retention-days: 7
           path: |
             build/java-runtime/${{ matrix.loader }}-java-${{ matrix.java }}/logs/
             build/java-runtime/${{ matrix.loader }}-java-${{ matrix.java }}/crash-reports/
 
-  release:
-    name: '汇总并创建 GitHub Release'
+  quality-gate:
+    name: '全版本质量门禁'
+    if: ${{ always() }}
     needs:
       - build
       - java-runtime
-    runs-on: windows-latest
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
-      - name: '检出发布提交'
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: '下载全部版本产物'
-        uses: actions/download-artifact@v7
-        with:
-          pattern: release-*
-          path: release/
-          merge-multiple: true
-
-      - name: '生成 SHA-256 校验和'
-        shell: pwsh
+      - name: '汇总并判定巡检结果'
+        shell: bash
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          RUNTIME_RESULT: ${{ needs.java-runtime.result }}
         run: |
-          $jars = @(Get-ChildItem release/*.jar -File | Sort-Object Name)
-          if ($jars.Count -ne 4) {
-            throw "预期汇总四个正式 JAR，实际为 $($jars.Count)"
-          }
-          $jars | ForEach-Object {
-            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$hash  $($_.Name)"
-          } | Out-File release/SHA256SUMS.txt -Encoding ascii
+          {
+            echo '## McBot 全版本巡检'
+            echo
+            echo "- 两个 Minecraft 版本的构建与单元测试：${BUILD_RESULT}"
+            echo "- 十组正式 Java 运行矩阵测试：${RUNTIME_RESULT}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: '创建版本发布'
-        shell: pwsh
+          if [[ "$BUILD_RESULT" != 'success' || "$RUNTIME_RESULT" != 'success' ]]; then
+            echo '全版本巡检失败。' >&2
+            exit 1
+          fi
+
+          echo '- 结论：全部维护版本继续满足支持标准。' >> "$GITHUB_STEP_SUMMARY"
+
+  report-failure:
+    name: '登记巡检失败'
+    if: ${{ always() && (needs.build.result != 'success' || needs.java-runtime.result != 'success') }}
+    needs:
+      - build
+      - java-runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: '创建或更新 GitHub Issue'
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BUILD_RESULT: ${{ needs.build.result }}
+          RUNTIME_RESULT: ${{ needs.java-runtime.result }}
         run: |
-          $assets = Get-ChildItem release -File | ForEach-Object { $_.FullName }
-          gh release create $env:GITHUB_REF_NAME $assets `
-            --verify-tag `
-            --generate-notes `
-            --title "McBot $env:GITHUB_REF_NAME"
+          title='[自动巡检] 全版本测试失败'
+          body=$(cat <<EOF
+          GitHub 全版本巡检未通过，需要维护者处理。
+
+          - 构建与单元测试：${BUILD_RESULT}
+          - 真实服务端运行矩阵：${RUNTIME_RESULT}
+          - 工作流：${RUN_URL}
+
+          请按照 [GitHub 测试规范](${GITHUB_SERVER_URL}/${REPOSITORY}/blob/1.20.1/TESTING_STANDARD.md) 检查日志、确认受影响矩阵，并通过新的提交重新运行完整质量门禁。
+          EOF
+          )
+
+          issue_number=$(gh issue list \
+            --repo "$REPOSITORY" \
+            --state open \
+            --search '"[自动巡检] 全版本测试失败" in:title' \
+            --json number,title \
+            --jq '.[] | select(.title == "[自动巡检] 全版本测试失败") | .number' \
+            | head -n 1)
+
+          if [[ -n "$issue_number" ]]; then
+            gh issue comment "$issue_number" --repo "$REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$REPOSITORY" --title "$title" --body "$body" --label bug
+          fi
