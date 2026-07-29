@@ -4,6 +4,11 @@
 
 ## 未发布
 
+## [3.0.4](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.4) - 2026-07-29
+
+- 从 Forge/NeoForge 成品内置的 Jupiter 中移除上游测试示例类，保留平台入口、网络同步和配置界面，首次启动不再生成无关的 `config/jupiter.json` 或记录读取异常。
+- 真实服务端 CI 现在拒绝任何 `Failed to load config`，并对加载器安装器下载执行断线重试。
+
 ## [3.0.3](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.3) - 2026-07-29
 
 - 将 Java 25 运行矩阵使用的最低加载器更新为 Fabric Loader 0.19.3 和 Forge 47.4.22，避免旧版 ASM/Mixin 无法读取 Java 25 类文件。

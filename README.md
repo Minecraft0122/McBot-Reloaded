@@ -98,11 +98,11 @@ Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/b
 
 ## 自动发布
 
-向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.3` 时：
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.4` 时：
 
 ```bash
-git tag 3.0.3
-git push origin 3.0.3
+git tag 3.0.4
+git push origin 3.0.4
 ```
 
 自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。

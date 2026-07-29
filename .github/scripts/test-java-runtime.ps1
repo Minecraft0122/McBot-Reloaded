@@ -30,6 +30,32 @@ $javaName = if ($isWindowsPlatform) { 'java.exe' } else { 'java' }
 $buildJava = Join-Path $buildJavaHome "bin\$javaName"
 $runtimeJava = Join-Path $runtimeJavaHome "bin\$javaName"
 
+function Invoke-Download {
+    param(
+        [Parameter(Mandatory = $true)] [string] $Uri,
+        [Parameter(Mandatory = $true)] [string] $OutFile,
+        [int] $Attempts = 5
+    )
+
+    $curl = Get-Command 'curl.exe' -ErrorAction SilentlyContinue
+    if ($curl) {
+        & $curl.Source --location --fail --silent --show-error --retry $Attempts --retry-delay 2 --retry-all-errors --output $OutFile $Uri
+        if ($LASTEXITCODE -eq 0) { return }
+        throw "curl failed to download $Uri with exit code $LASTEXITCODE."
+    }
+
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile
+            return
+        } catch {
+            if ($attempt -eq $Attempts) { throw }
+            Write-Warning "Download attempt $attempt failed for $Uri. Retrying..."
+            Start-Sleep -Seconds ([Math]::Min(2 * $attempt, 10))
+        }
+    }
+}
+
 foreach ($requiredFile in @($buildJava, $runtimeJava)) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Required Java executable is missing: $requiredFile"
@@ -57,18 +83,22 @@ if ($runtimeVersion -notmatch ('version "' + $ExpectedJava + '[."]')) {
     throw "The server JDK is not Java $ExpectedJava."
 }
 
-$modCandidates = @(
-    Get-ChildItem -LiteralPath (Join-Path $repositoryRoot "$Loader\build\libs") -File -Filter "*-$Loader.jar" |
-        Where-Object Name -NotMatch '(?:-dev|-sources)\.jar$'
-)
-if ($modCandidates.Count -ne 1) {
-    throw "Expected exactly one production $Loader JAR, found $($modCandidates.Count)."
+$versionMatch = Select-String -LiteralPath (Join-Path $repositoryRoot 'gradle.properties') -Pattern '^mod_version=(.+)$'
+if (-not $versionMatch) {
+    throw 'gradle.properties does not define mod_version.'
+}
+$modVersion = $versionMatch.Matches[0].Groups[1].Value.Trim()
+$modJar = Join-Path $repositoryRoot "$Loader\build\libs\McBot-$MinecraftVersion-$modVersion-$Loader.jar"
+if (-not (Test-Path -LiteralPath $modJar -PathType Leaf)) {
+    throw "Production mod JAR is missing: $modJar"
 }
 
 $serverDirectory = Join-Path $repositoryRoot "build\java-runtime\$Loader-java-$ExpectedJava"
 $modsDirectory = Join-Path $serverDirectory 'mods'
 New-Item -ItemType Directory -Path $modsDirectory -Force | Out-Null
-Copy-Item -LiteralPath $modCandidates[0].FullName -Destination $modsDirectory -Force
+Get-ChildItem -LiteralPath $modsDirectory -File -Filter 'McBot-*.jar' -ErrorAction SilentlyContinue |
+    Remove-Item -Force
+Copy-Item -LiteralPath $modJar -Destination $modsDirectory -Force
 
 Set-Content -LiteralPath (Join-Path $serverDirectory 'eula.txt') -Value 'eula=true' -Encoding ascii
 @(
@@ -86,7 +116,7 @@ $serverArguments.Add('-Xmx1G')
 if ($Loader -eq 'fabric') {
     $fabricLauncher = Join-Path $serverDirectory 'fabric-server-launch.jar'
     $fabricLauncherUrl = "https://meta.fabricmc.net/v2/versions/loader/$MinecraftVersion/$LoaderVersion/1.0.1/server/jar"
-    Invoke-WebRequest -Uri $fabricLauncherUrl -OutFile $fabricLauncher
+    Invoke-Download -Uri $fabricLauncherUrl -OutFile $fabricLauncher
     $serverArguments.Add('-jar')
     $serverArguments.Add($fabricLauncher)
 } else {
@@ -101,7 +131,7 @@ if ($Loader -eq 'fabric') {
     }
 
     $installer = Join-Path $serverDirectory "$Loader-installer.jar"
-    Invoke-WebRequest -Uri $installerUrl -OutFile $installer
+    Invoke-Download -Uri $installerUrl -OutFile $installer
     $savedErrorActionPreference = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     & $buildJava -jar $installer --installServer $serverDirectory 2>&1 | ForEach-Object { Write-Host $_ }
@@ -231,7 +261,7 @@ $fatalPatterns = @(
     'NoSuchMethodError'
     'NoClassDefFoundError'
     'LinkageError'
-    'Failed to load config: .*[/\\]mcbot[/\\]config\.json'
+    'Failed to load config:'
 )
 foreach ($fatalPattern in $fatalPatterns) {
     if ($combinedLogs -match $fatalPattern) {

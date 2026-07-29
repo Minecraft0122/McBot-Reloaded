@@ -24,13 +24,13 @@ Java 21、25 均由 GitHub Actions 进行真实服务端启动和关服测试。
 Windows PowerShell 校验示例：
 
 ```powershell
-Get-FileHash .\McBot-1.20.1-3.0.3-forge.jar -Algorithm SHA256
+Get-FileHash .\McBot-1.20.1-3.0.4-forge.jar -Algorithm SHA256
 ```
 
 Linux 校验示例：
 
 ```bash
-sha256sum McBot-1.20.1-3.0.3-forge.jar
+sha256sum McBot-1.20.1-3.0.4-forge.jar
 ```
 
 不要使用 Release 页面底部由 GitHub 自动生成的 `Source code (zip)` 或 `Source code (tar.gz)`；它们是源码，不是可安装模组。

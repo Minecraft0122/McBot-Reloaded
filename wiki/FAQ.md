@@ -8,6 +8,10 @@
 
 不需要。3.0.2 起，Fabric 版本使用原版 Mixin 转发生命周期和命令事件，配置核心与 OneBot Client 也已经内置。服务端只需 Fabric Loader 和对应版本的 McBot JAR；Mod Menu 仅是可选客户端界面。
 
+## `config/jupiter.json` 是 McBot 的配置吗？
+
+不是。它是旧版内置 Jupiter 遗留的上游测试示例，McBot 的正式配置始终位于 `mcbot/config.json`。3.0.4 起，Forge/NeoForge 成品不再包含该测试类，也不会生成或读取 `config/jupiter.json`；升级并停服后可以删除旧的示例文件。
+
 ## 可以把 1.20.1 JAR 用在 1.20.2 或 1.20.4 吗？
 
 不可以。Minecraft 和加载器 API 存在二进制差异，必须使用明确匹配的构建。正式支持范围见[兼容版本](Compatibility)。

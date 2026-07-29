@@ -13,7 +13,7 @@
 
 使用 Java 25 时必须满足表中的最低加载器版本；更旧的加载器可能在 McBot 初始化前就因 ASM/Mixin 无法识别 Java 25 类文件而停止。
 
-自动发布会从两个正式版本分支构建四个可安装 JAR，并汇总到同一个 GitHub Release。文件名形如 `McBot-1.20.1-3.0.3-fabric.jar`；不同 Minecraft 版本和加载器的 JAR 不能混用。
+自动发布会从两个正式版本分支构建四个可安装 JAR，并汇总到同一个 GitHub Release。文件名形如 `McBot-1.20.1-3.0.4-fabric.jar`；不同 Minecraft 版本和加载器的 JAR 不能混用。
 
 “已验证 Java”只列出持续集成明确覆盖的运行时：1.20.1 仍以 Java 17 编译，1.21.1 以 Java 21 编译；Java 21、25 运行测试使用真实 Fabric、Forge 或 NeoForge 专用服务器。Java 18—20、22—24 未纳入持续兼容矩阵。
 

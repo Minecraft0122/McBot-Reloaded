@@ -66,7 +66,7 @@
 - `setBot` 修复数字类型解析并立即保存；
 - `say` 支持最后一个 `%` 接收包含空格的剩余参数。
 
-若仍能复现，先确认实际加载的是 3.0.3 JAR，而不是旧 JAR、开发包或 GitHub Source code。
+若仍能复现，先确认实际加载的是 3.0.4 JAR，而不是旧 JAR、开发包或 GitHub Source code。
 
 ## `/mcbot reload` 后没有变化
 
