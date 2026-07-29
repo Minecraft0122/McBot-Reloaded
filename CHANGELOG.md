@@ -2,6 +2,17 @@
 
 本文件记录 McBot 的重要变更。历史内容整理自上游提交记录。
 
+## 未发布
+
+## [3.0.3](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.3) - 2026-07-29
+
+- 将 Java 25 运行矩阵使用的最低加载器更新为 Fabric Loader 0.19.3 和 Forge 47.4.22，避免旧版 ASM/Mixin 无法读取 Java 25 类文件。
+- 首次启动缺少 `mcbot/config.json` 时直接生成默认配置，不再先记录一次配置读取异常。
+- 为 1.20.1 Fabric/Forge 与 1.21.1 Fabric/NeoForge 增加 Java 21、25 真实服务端启动、McBot 加载和正常关服测试。
+- 构建继续使用各 Minecraft 版本的基准 JDK，服务端运行进程使用独立 JDK，避免把 Gradle 兼容性误判为模组运行兼容性。
+- 启动日志记录 Java 版本、供应商和虚拟机，方便定位客户环境问题。
+- 同步更新 README、支持版本表与中文 Wiki 的 Java 兼容矩阵。
+
 ## [3.0.2](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.2) - 2026-07-29
 
 ### 独立运行

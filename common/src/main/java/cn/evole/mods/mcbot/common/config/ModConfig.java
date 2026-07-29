@@ -43,6 +43,21 @@ public class ModConfig extends AutoInitConfigContainer {
     }
 
     @Override
+    public void load() {
+        File configFile = new File(this.path);
+        if (!configFile.isFile()) {
+            File parent = configFile.getParentFile();
+            if (parent != null && !parent.isDirectory() && !parent.mkdirs()) {
+                throw new IllegalStateException("无法创建 McBot 配置目录：" + parent);
+            }
+            save();
+            Constants.LOGGER.info("已在 {} 生成默认 {} 配置。", configFile.getAbsolutePath(), Constants.MOD_NAME);
+            return;
+        }
+        super.load();
+    }
+
+    @Override
     protected boolean shouldLoad(JsonObject obj) {
         if (!obj.has("version") || !obj.get("version").isJsonPrimitive()) {
             Constants.LOGGER.warn("{} 配置缺少有效的版本号，将备份旧配置并生成新配置。", Constants.MOD_NAME);

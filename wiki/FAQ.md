@@ -12,6 +12,10 @@
 
 不可以。Minecraft 和加载器 API 存在二进制差异，必须使用明确匹配的构建。正式支持范围见[兼容版本](Compatibility)。
 
+## 可以使用 Java 25 吗？Java 21 会不会被放弃？
+
+可以，Java 21 和 Java 25 都在持续兼容矩阵中。GitHub Actions 会用两种 Java 分别启动 Fabric、Forge 或 NeoForge 专用服务器，确认 McBot 已加载后正常关服。Minecraft 1.20.1 仍兼容 Java 17，Minecraft 1.21.1 的最低版本仍是 Java 21；支持 Java 25 不会提高现有最低要求。
+
 ## 为什么 Release 里有多个 JAR？
 
 文件名同时包含 Minecraft 版本和加载器。选择与你服务端完全一致的文件：

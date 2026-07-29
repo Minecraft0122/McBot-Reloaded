@@ -2,7 +2,7 @@
 
 McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot-11) 协议的 Minecraft 服务端模组，用于在 Minecraft 服务器与 QQ 群之间转发消息，并允许群成员查询服务器状态或执行获准的自定义命令。
 
-完整的安装、OneBot 接入、配置、命令和故障排除说明见[中文 Wiki 源文件](https://github.com/Minecraft0122/McBot-Reloaded/tree/1.20.1/wiki)。GitHub Wiki 初始化后会由工作流自动同步这些页面。
+完整的安装、OneBot 接入、配置、命令和故障排除说明见[中文 Wiki](https://github.com/Minecraft0122/McBot-Reloaded/wiki)；对应的版本控制源文件位于仓库的 [`wiki/`](wiki/) 目录，并由工作流自动同步。
 
 本项目由 **Minecraft0122** 继续维护；本分支面向 Minecraft 1.20.1，同时支持 Fabric 与 Forge。代码源自 [Nova-Committee/McBot](https://github.com/Nova-Committee/McBot)，原作者与历史贡献者署名依照 GPL-3.0-or-later 保留。
 
@@ -29,12 +29,14 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 | 项目 | 支持范围 | 项目构建基准 |
 | --- | --- | --- |
 | Minecraft | **仅 1.20.1** | 1.20.1 |
-| Java | 正式支持 Java 17 | CI 使用 Temurin 17，字节码目标为 Java 17 |
-| Fabric Loader | 0.16.9 或更高版本 | 0.16.9 |
-| Forge | 47.3.12 至 47.x | 47.3.12 |
+| Java | 17、21、25 | 字节码目标为 Java 17；CI 使用 Java 21、25 启动真实服务端 |
+| Fabric Loader | 0.19.3 或更高版本 | 0.19.3 |
+| Forge | 47.4.22 至 47.x | 47.4.22 |
 | OneBot | OneBot 11 正向 WebSocket | OneBot Client 0.4.3 |
 
 本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。其他 Minecraft 版本的维护等级、加载器与 Java 要求见 [支持版本表](SUPPORTED_VERSIONS.md)，不同版本的 JAR 不能混用。配置核心和 OneBot Client 已打包进模组，Fabric、Forge 均不需要额外前置模组；Mod Menu 7.2.2 或更高版本仅用于可选的客户端配置界面。
+
+Java 17 是 1.20.1 的最低运行版本和构建基准。Java 21、25 会在每次正式分支变更时分别启动 Fabric、Forge 专用服务器，确认 McBot 已加载后执行正常关服；Java 18—20、22—24 没有纳入持续兼容矩阵，不作同等级保证。使用 Java 25 时必须安装表中的最低加载器版本，旧版加载器可能在 McBot 初始化前就无法读取 Java 25 类文件。
 
 这是服务端模组：专用服务器的普通玩家客户端无需安装。若在客户端或单人游戏中安装，模组仍可加载，并可通过 Mod Menu 使用配置界面。
 
@@ -86,19 +88,21 @@ OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQ
 
 ## 构建
 
+本分支使用 JDK 17 驱动 Gradle 并生成 Java 17 字节码：
+
 ```bash
 ./gradlew clean build
 ```
 
-Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/build/libs/` 和 `forge/build/libs/`。
+Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/build/libs/` 和 `forge/build/libs/`。Java 21、25 是服务端运行兼容目标，不应直接替代本分支的 Gradle 基准 JDK；GitHub Actions 会把构建 JDK 与服务端运行 JDK 分离验证。
 
 ## 自动发布
 
-向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.2` 时：
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.3` 时：
 
 ```bash
-git tag 3.0.2
-git push origin 3.0.2
+git tag 3.0.3
+git push origin 3.0.3
 ```
 
 自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。

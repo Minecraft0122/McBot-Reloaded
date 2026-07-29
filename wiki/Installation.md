@@ -4,14 +4,16 @@
 
 先查看[兼容版本](Compatibility)。正式 Release 当前提供以下组合：
 
-| Minecraft | 加载器 | Java | 文件名结尾 |
+| Minecraft | 加载器 | 已验证 Java | 文件名结尾 |
 | --- | --- | --- | --- |
-| 1.20.1 | Fabric | 17 | `-fabric.jar` |
-| 1.20.1 | Forge | 17 | `-forge.jar` |
-| 1.21.1 | Fabric | 21 | `-fabric.jar` |
-| 1.21.1 | NeoForge | 21 | `-neoforge.jar` |
+| 1.20.1 | Fabric Loader 0.19.3+ | 17、21、25 | `-fabric.jar` |
+| 1.20.1 | Forge 47.4.22—47.x | 17、21、25 | `-forge.jar` |
+| 1.21.1 | Fabric Loader 0.19.3+ | 21、25 | `-fabric.jar` |
+| 1.21.1 | NeoForge 21.1.244+（21.1.x） | 21、25 | `-neoforge.jar` |
 
 例如，Minecraft 1.20.1 Forge 服务端必须使用 `McBot-1.20.1-版本号-forge.jar`。不能把 Fabric JAR 安装到 Forge，也不能把 1.21.1 JAR 安装到 1.20.1。
+
+Java 21、25 均由 GitHub Actions 进行真实服务端启动和关服测试。若使用 1.20.1，Java 17 仍是最低版本；若使用 1.21.1，Java 21 是最低版本。Java 18—20、22—24 没有纳入持续兼容矩阵。
 
 ## 2. 下载并校验
 
@@ -22,13 +24,13 @@
 Windows PowerShell 校验示例：
 
 ```powershell
-Get-FileHash .\McBot-1.20.1-3.0.2-forge.jar -Algorithm SHA256
+Get-FileHash .\McBot-1.20.1-3.0.3-forge.jar -Algorithm SHA256
 ```
 
 Linux 校验示例：
 
 ```bash
-sha256sum McBot-1.20.1-3.0.2-forge.jar
+sha256sum McBot-1.20.1-3.0.3-forge.jar
 ```
 
 不要使用 Release 页面底部由 GitHub 自动生成的 `Source code (zip)` 或 `Source code (tar.gz)`；它们是源码，不是可安装模组。

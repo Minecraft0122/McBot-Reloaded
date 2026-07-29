@@ -5,8 +5,8 @@
 ## 准备内容
 
 - 一个受支持的 Minecraft 服务端。
-- 与 Minecraft 版本和加载器匹配的 McBot JAR。
 - 对应 Minecraft 版本和加载器的 McBot JAR；所有正式加载器均不需要其他前置模组。
+- 对应的 Java：1.20.1 最低为 17，1.21.1 最低为 21；Java 21、25 均在正式加载器上持续验证。
 - 一个支持 OneBot 11 正向 WebSocket 的 QQ 机器人实现，推荐使用仍在维护的 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)。
 - 机器人 QQ 号、需要互通的 QQ 群号，以及自定义访问令牌。
 
