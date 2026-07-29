@@ -10,11 +10,11 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 
 请从 [GitHub Releases 最新版本](https://github.com/Minecraft0122/McBot-Reloaded/releases/latest)下载，不要使用页面上由 GitHub 自动生成的 `Source code` 压缩包。
 
-- Fabric 服务端下载文件名以 `-fabric.jar` 结尾，并另外安装 Fabric API。
+- Fabric 服务端下载文件名以 `-fabric.jar` 结尾；不需要安装 Fabric API 或其他前置模组。
 - Forge 服务端下载文件名以 `-forge.jar` 结尾，不要与 Fabric 版本同时安装。
 - 可使用同一 Release 中的 `SHA256SUMS.txt` 核对文件完整性。
 
-将对应 JAR 放入服务端的 `mods` 目录即可。Jupiter 配置库和 OneBot Client 已内置，普通玩家客户端无需安装 McBot。
+将对应 JAR 放入服务端的 `mods` 目录即可。配置核心和 OneBot Client 已内置，普通玩家客户端无需安装 McBot。
 
 ## 功能
 
@@ -31,11 +31,10 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 | Minecraft | **仅 1.20.1** | 1.20.1 |
 | Java | 正式支持 Java 17 | CI 使用 Temurin 17，字节码目标为 Java 17 |
 | Fabric Loader | 0.16.9 或更高版本 | 0.16.9 |
-| Fabric API | 适用于 1.20.1 的 0.92.2 或更高版本 | 0.92.2+1.20.1 |
 | Forge | 47.3.12 至 47.x | 47.3.12 |
 | OneBot | OneBot 11 正向 WebSocket | OneBot Client 0.4.3 |
 
-本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。其他 Minecraft 版本的维护等级、加载器与 Java 要求见 [支持版本表](SUPPORTED_VERSIONS.md)，不同版本的 JAR 不能混用。Jupiter 配置库和 OneBot Client 已打包进模组，用户无需单独安装。Fabric 环境必须安装 Fabric API；Mod Menu 7.2.2 或更高版本是可选依赖。
+本分支没有声明兼容 Minecraft 1.20.2—1.20.6 或 1.21.x；这些版本存在 Minecraft API 和加载器二进制差异，不能直接使用本分支产物。其他 Minecraft 版本的维护等级、加载器与 Java 要求见 [支持版本表](SUPPORTED_VERSIONS.md)，不同版本的 JAR 不能混用。配置核心和 OneBot Client 已打包进模组，Fabric、Forge 均不需要额外前置模组；Mod Menu 7.2.2 或更高版本仅用于可选的客户端配置界面。
 
 这是服务端模组：专用服务器的普通玩家客户端无需安装。若在客户端或单人游戏中安装，模组仍可加载，并可通过 Mod Menu 使用配置界面。
 
@@ -43,7 +42,7 @@ OneBot 端可使用支持正向 WebSocket 的 OneBot 11 实现，例如 [NapCatQ
 
 ## 安装与连接
 
-1. 安装与服务端加载器匹配的 McBot、Fabric API（仅 Fabric 需要）及其依赖。
+1. 安装与服务端加载器匹配的 McBot；不要混用其他 Minecraft 版本或加载器的 JAR。
 2. 启动一次服务器，使模组生成 `mcbot/config.json` 和 `mcbot/cmds/`。
 3. 在 OneBot 实现中启用正向 WebSocket，并记下地址、端口和访问令牌。
 4. 修改 `mcbot/config.json` 中的机器人地址、QQ 号、令牌和互通群号，或在游戏内使用 `/mcbot` 命令配置。
@@ -95,11 +94,11 @@ Windows 可运行 `gradlew.bat clean build`。构建产物分别位于 `fabric/b
 
 ## 自动发布
 
-向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.1` 时：
+向 GitHub 推送与 `gradle.properties` 中 `mod_version` 完全一致、没有 `v` 前缀的标签即可自动发布。例如 `mod_version=3.0.2` 时：
 
 ```bash
-git tag 3.0.1
-git push origin 3.0.1
+git tag 3.0.2
+git push origin 3.0.2
 ```
 
 自动发布会在干净环境中运行全部测试，从 `1.20.1` 分支构建 Fabric/Forge、从 `1.21.1` 分支构建 Fabric/NeoForge，共上传四个正式 JAR，并生成 `SHA256SUMS.txt` 和 GitHub 构建来源证明，然后创建带自动发行说明的 GitHub Release。标签与模组版本不一致时会拒绝发布；开发包和源码包不会作为 Release 附件上传。

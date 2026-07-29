@@ -6,14 +6,14 @@
 
 - 一个受支持的 Minecraft 服务端。
 - 与 Minecraft 版本和加载器匹配的 McBot JAR。
-- Fabric 服务端所需的 Fabric API；Forge 和 NeoForge 不需要 Fabric API。
+- 对应 Minecraft 版本和加载器的 McBot JAR；所有正式加载器均不需要其他前置模组。
 - 一个支持 OneBot 11 正向 WebSocket 的 QQ 机器人实现，推荐使用仍在维护的 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)。
 - 机器人 QQ 号、需要互通的 QQ 群号，以及自定义访问令牌。
 
 ## 五分钟部署
 
 1. 从 [GitHub Releases](https://github.com/Minecraft0122/McBot-Reloaded/releases/latest)下载正确的 McBot JAR，不要下载 GitHub 自动生成的 `Source code` 压缩包。
-2. 把 JAR 放入服务端的 `mods` 目录。Fabric 还要放入对应版本的 Fabric API。
+2. 把 JAR 放入服务端的 `mods` 目录，不需要安装 Fabric API 或 Jupiter。
 3. 启动一次服务端，等待生成 `mcbot/config.json` 和 `mcbot/cmds/`，然后正常停止服务端。
 4. 在 OneBot 实现中建立“WebSocket 服务端/正向 WebSocket”，建议监听 `127.0.0.1:18082`，设置一个强随机令牌，并关闭自身消息上报。
 5. 修改 `mcbot/config.json`，至少设置 WebSocket 地址、访问令牌、机器人 QQ 号和互通群号。不要删除配置中的 `version` 字段。
@@ -60,4 +60,3 @@
 - 不要在 Issue、聊天截图或公开日志中提交真实令牌。
 - 同机部署时优先监听 `127.0.0.1`；跨机器部署时优先使用防火墙、专用网络或 `wss://`。
 - 正式服务器建议先在测试群完成双向消息和命令权限验证。
-

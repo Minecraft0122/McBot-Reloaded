@@ -7,7 +7,7 @@ architectury {
     fabric()
 }
 
-println "Fabric API: $fabric_api_version, Loader: $fabric_loader_version"
+println "Fabric Loader: $fabric_loader_version（无需 Fabric API）"
 
 configurations {
     common {
@@ -22,19 +22,38 @@ configurations {
         canBeResolved = true
         canBeConsumed = false
     }
+
+    jupiterCoreSource {
+        canBeResolved = true
+        canBeConsumed = false
+    }
 }
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version+$rootProject.minecraft_version"
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle(project(path: ':common', configuration: 'transformProductionFabric'))
 
     implementation shadowBundle("cn.evole.onebot:OneBot-Client:$onebot_client_version"){transitive = false}
     implementation shadowBundle("com.github.houbb:csv:0.2.0")
-    modImplementation include("curse.maven:jupiter-1072905:$jupiter_fabric_version")
-    modImplementation ("com.terraformersmc:modmenu:$modmenu_version")
+    modCompileOnly ("curse.maven:jupiter-1072905:$jupiter_fabric_version")
+    jupiterCoreSource ("curse.maven:jupiter-1072905:$jupiter_fabric_version")
+    modCompileOnly ("com.terraformersmc:modmenu:$modmenu_version")
+}
+
+def jupiterCoreJar = tasks.register('jupiterCoreJar', Jar) {
+    archiveFileName = 'mcbot-jupiter-core.jar'
+    destinationDirectory = layout.buildDirectory.dir('jupiter-core')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from({ zipTree(configurations.jupiterCoreSource.singleFile) }) {
+        exclude 'fabric.mod.json'
+        exclude 'com/iafenvoy/jupiter/EntryPointLoader.class'
+        exclude 'com/iafenvoy/jupiter/fabric/**'
+        exclude 'com/iafenvoy/jupiter/network/fabric/**'
+        exclude 'com/iafenvoy/jupiter/test/**'
+    }
 }
 
 processResources {
@@ -46,8 +65,11 @@ processResources {
 }
 
 shadowJar {
+    dependsOn jupiterCoreJar
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = "dev-shadow"
+
+    from(jupiterCoreJar.flatMap { it.archiveFile })
 
     relocate 'org.yaml', 'cn.evole.dependencies.yaml'
     relocate 'org.spongepowered.configurate', 'cn.evole.dependencies.spongepowered.configurate'
@@ -56,6 +78,7 @@ shadowJar {
     relocate 'com.google.errorprone', 'cn.evole.dependencies.errorprone'
     relocate 'org.apiguardian', 'cn.evole.dependencies.apiguardian'
     relocate 'com.github.houbb', 'cn.evole.dependencies.houbb'
+    relocate 'com.iafenvoy.jupiter', 'cn.evole.mods.mcbot.dependencies.jupiter'
 }
 
 remapJar {

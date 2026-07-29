@@ -4,9 +4,9 @@
 
 专用服务器不需要。McBot 是服务端模组，普通玩家客户端无需安装。单人游戏或集成服务器由客户端进程承担服务端职责时，可以安装 McBot。
 
-## Fabric 为什么启动时提示缺少依赖？
+## Fabric 还需要安装 Fabric API 吗？
 
-Fabric 版本必须安装与 Minecraft 版本匹配的 Fabric API。Jupiter 和 OneBot Client 已内置，不需要另行安装。
+不需要。3.0.2 起，Fabric 版本使用原版 Mixin 转发生命周期和命令事件，配置核心与 OneBot Client 也已经内置。服务端只需 Fabric Loader 和对应版本的 McBot JAR；Mod Menu 仅是可选客户端界面。
 
 ## 可以把 1.20.1 JAR 用在 1.20.2 或 1.20.4 吗？
 
@@ -66,4 +66,3 @@ McBot 是客户端，它主动连接 OneBot 的 WebSocket 服务端，这在 One
 ## 在哪里反馈？
 
 使用[本项目 Issues](https://github.com/Minecraft0122/McBot-Reloaded/issues/new/choose)，不要在已经停止维护的上游仓库提交本分支问题。提交前阅读[故障排除](Troubleshooting)。
-

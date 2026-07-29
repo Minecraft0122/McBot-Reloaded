@@ -2,6 +2,15 @@
 
 本文件记录 McBot 的重要变更。历史内容整理自上游提交记录。
 
+## [3.0.2](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.2) - 2026-07-29
+
+### 独立运行
+
+- 移除 Fabric API 必需依赖，改用原版 Mixin 转发生命周期、命令、玩家登录退出和刻末事件。
+- 将 Jupiter 缩减为内置配置核心并重定位命名空间；Fabric 用户不再需要安装 Fabric API、Jupiter 或其他前置模组。
+- 修复 OneBot 自动重连计时器在关服后残留、导致 JVM 无法退出的问题。
+- Minecraft 1.20.1 与 1.21.1 Fabric 均已在仅安装 Fabric Loader 和 McBot 的空白服务端完成启动、生成配置、优雅关服回归。
+
 ## [3.0.1](https://github.com/Minecraft0122/McBot-Reloaded/releases/tag/3.0.1) - 2026-07-28
 
 ### 修复

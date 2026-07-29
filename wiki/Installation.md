@@ -22,23 +22,23 @@
 Windows PowerShell 校验示例：
 
 ```powershell
-Get-FileHash .\McBot-1.20.1-3.0.1-forge.jar -Algorithm SHA256
+Get-FileHash .\McBot-1.20.1-3.0.2-forge.jar -Algorithm SHA256
 ```
 
 Linux 校验示例：
 
 ```bash
-sha256sum McBot-1.20.1-3.0.1-forge.jar
+sha256sum McBot-1.20.1-3.0.2-forge.jar
 ```
 
 不要使用 Release 页面底部由 GitHub 自动生成的 `Source code (zip)` 或 `Source code (tar.gz)`；它们是源码，不是可安装模组。
 
-## 3. 安装依赖
+## 3. 安装模组
 
 ### Fabric
 
 - 安装与 Minecraft 版本匹配的 Fabric Loader。
-- 在 `mods` 目录中放入 McBot 和对应版本的 Fabric API。
+- 在 `mods` 目录中只放入对应版本的 McBot JAR；不需要 Fabric API、Jupiter 或其他前置模组。
 - Mod Menu 是可选依赖，只在需要客户端配置界面时安装。
 
 ### Forge / NeoForge
@@ -47,7 +47,7 @@ sha256sum McBot-1.20.1-3.0.1-forge.jar
 - 把对应 McBot JAR 放入 `mods` 目录。
 - 不要额外安装 Fabric API。
 
-Jupiter 配置库和 OneBot Client 已打入正式 JAR，普通用户不需要单独下载。
+配置核心和 OneBot Client 已打入正式 JAR，普通用户不需要单独下载。
 
 ## 4. 首次启动
 
@@ -86,4 +86,3 @@ McBot 是服务端模组。专用服务器上的普通玩家客户端无需安�
 ## 7. 卸载
 
 停止服务端并移除 McBot JAR 即可。若不再需要历史配置、绑定和聊天记录，可在确认备份后手工处理 `mcbot/` 目录。普通卸载不会要求玩家修改客户端。
-

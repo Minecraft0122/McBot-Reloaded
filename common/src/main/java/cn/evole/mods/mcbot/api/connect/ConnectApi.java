@@ -135,6 +135,10 @@ public final class ConnectApi {
     private static void closeQuietly(OneBotClient client) {
         if (client == null) return;
         try {
+            if (client.getWs() != null) {
+                // 普通 close() 不会取消 OneBot Client 的自动重连 Timer，会阻止服务端 JVM 退出。
+                client.getWs().stopWithoutReconnect(1000, "McBot disconnect");
+            }
             client.close();
         } catch (Exception e) {
             Constants.LOGGER.warn("关闭 OneBot WebSocket 时发生异常", e);

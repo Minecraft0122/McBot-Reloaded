@@ -28,7 +28,7 @@
 /mcbot status
 ```
 
-3.0.1 的连接过程不会阻塞 Minecraft 服务端主线程；OneBot 未及时启动时，Minecraft 应继续完成启动。
+3.0.2 的连接过程不会阻塞 Minecraft 服务端主线程；OneBot 未及时启动时，Minecraft 应继续完成启动。
 
 ## QQ 能发到游戏，但游戏不能发到 QQ
 
@@ -44,12 +44,12 @@
 - 确认 `/mcbot receive all true` 和 `/mcbot receive chat true`。
 - 确认 `common.groupOn=true`，且来源群在 `groupIdList` 中。
 - 如果启用了 `qqChatPrefixOn`，QQ 消息必须使用配置的 `qqChatPrefix`。
-- NapCat 建议使用消息段数组；McBot 3.0.1 同时兼容数组和字符串消息。
+- NapCat 建议使用消息段数组；McBot 3.0.2 同时兼容数组和字符串消息。
 - 关闭 OneBot 的自身消息上报，避免机器人消息回环。
 
 ## 消息重复转发
 
-3.0.1 已增加群号去重和事件注册幂等保护。仍然重复时：
+3.0.2 已增加群号去重和事件注册幂等保护。仍然重复时：
 
 - 确认 `mods` 中只有一个 McBot JAR；
 - 检查 `groupIdList` 是否包含重复群号；
@@ -60,17 +60,17 @@
 
 ## `/mcbot delGroup`、`setBot` 或自定义 `say` 报错
 
-这些问题已在 3.0.1 修复：
+这些问题已在 3.0.2 修复：
 
 - `delGroup` 统一使用 Long 群号参数并立即保存；
 - `setBot` 修复数字类型解析并立即保存；
 - `say` 支持最后一个 `%` 接收包含空格的剩余参数。
 
-若仍能复现，先确认实际加载的是 3.0.1 JAR，而不是旧 JAR、开发包或 GitHub Source code。
+若仍能复现，先确认实际加载的是 3.0.2 JAR，而不是旧 JAR、开发包或 GitHub Source code。
 
 ## `/mcbot reload` 后没有变化
 
-3.0.1 会重新加载主配置、语言和自定义命令。检查：
+3.0.2 会重新加载主配置、语言和自定义命令。检查：
 
 - JSON 语法有效且为 UTF-8；
 - 自定义命令的 `enable` 为 `true`；
@@ -80,7 +80,7 @@
 
 ## 颜色码、`@null` 和换行
 
-3.0.1 已处理：
+3.0.2 已处理：
 
 - 群名片/昵称为空时回退到 QQ 号；
 - 移除 Minecraft 旧式、十六进制和 ANSI 格式控制码；
@@ -119,4 +119,3 @@
 - 是否安装聊天、假人、权限、跨服或图片显示类模组。
 
 必须删除 QQ Token、公网地址中的凭据、Cookie、扫码登录信息和其他隐私数据。
-

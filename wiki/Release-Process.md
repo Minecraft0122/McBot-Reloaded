@@ -5,7 +5,7 @@
 ## 版本规则
 
 - 当前版本线从 `3.0.0` 重新编号。
-- 正式标签只包含版本号，例如 `3.0.1`，不使用 `v3.0.1`、`release-3.0.1` 等前缀。
+- 正式标签只包含版本号，例如 `3.0.2`，不使用 `v3.0.2`、`release-3.0.2` 等前缀。
 - 标签必须与正式分支 `gradle.properties` 中的 `mod_version` 完全一致。
 - JAR 文件保留 Minecraft 版本和加载器后缀，防止用户混装。
 
@@ -23,8 +23,8 @@
 推送纯版本号标签：
 
 ```bash
-git tag -a 3.0.1 -m "McBot 3.0.1"
-git push origin 3.0.1
+git tag -a 3.0.2 -m "McBot 3.0.2"
+git push origin 3.0.2
 ```
 
 `.github/workflows/publish.yml` 会：
@@ -66,4 +66,3 @@ SHA256SUMS.txt
 ## 历史版本
 
 历史维护分支可以通过 CI 上传短期构建产物，但在真实服务端关键回归完成前，不应混入正式 Release。1.12.2 在缺失可信上游依赖的情况下不得发布拼装或来源不明的 JAR。
-

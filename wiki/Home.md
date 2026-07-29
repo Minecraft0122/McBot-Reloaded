@@ -8,7 +8,7 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 
 1. 查看[兼容版本](Compatibility)，确认 Minecraft、加载器和 Java 版本。
 2. 从[最新正式版](https://github.com/Minecraft0122/McBot-Reloaded/releases/latest)下载名称与服务端完全匹配的 JAR。
-3. 按照[安装教程](Installation)安装模组和必要依赖。
+3. 按照[安装教程](Installation)安装与服务端版本匹配的单个 McBot JAR。
 4. 按照[OneBot 配置](OneBot-Setup)启用正向 WebSocket。
 5. 完成[快速开始](Quick-Start)中的首次连接测试。
 
@@ -19,7 +19,7 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 | 1.20.1 | Fabric、Forge | 17 | 无需安装 |
 | 1.21.1 | Fabric、NeoForge | 21 | 无需安装 |
 
-Fabric 服务端还必须安装对应 Minecraft 版本的 Fabric API。不同 Minecraft 版本和加载器的 JAR 不能混用。
+Fabric 版本已经内置配置核心并改用原版 Mixin 事件，不需要 Fabric API、Jupiter 或其他前置模组。不同 Minecraft 版本和加载器的 JAR 不能混用。
 
 ## 主要功能
 
@@ -32,7 +32,7 @@ Fabric 服务端还必须安装对应 Minecraft 版本的 Fabric API。不同 Mi
 
 ## 当前状态
 
-截至 2026-07-28，当前正式版本为 **3.0.1**。MC 百科故障排除页面列出的主要连接、命令和消息问题已经修复，但不能宣称全部问题均已解决：1.12.2 仍受失效上游依赖阻塞，复杂命令输出图片化尚未完成，部分模组组合仍需实机回归。详情见[已知问题与故障排除](Troubleshooting)。
+截至 2026-07-29，当前正式版本为 **3.0.2**。MC 百科故障排除页面列出的主要连接、命令和消息问题已经修复，但不能宣称全部问题均已解决：1.12.2 仍受失效上游依赖阻塞，复杂命令输出图片化尚未完成，部分模组组合仍需实机回归。详情见[已知问题与故障排除](Troubleshooting)。
 
 ## 获取帮助
 
@@ -41,4 +41,3 @@ Fabric 服务端还必须安装对应 Minecraft 版本的 Fabric API。不同 Mi
 - [配置参考](Configuration)
 - [提交问题](https://github.com/Minecraft0122/McBot-Reloaded/issues/new/choose)
 - [项目仓库](https://github.com/Minecraft0122/McBot-Reloaded)
-
