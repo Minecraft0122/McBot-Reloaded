@@ -12,18 +12,18 @@ McBot Reloaded 是一个基于 [OneBot 11](https://github.com/botuniverse/onebot
 | --- | --- |
 | Minecraft | **仅 1.21.1** |
 | Java | 21 或更高版本；构建目标为 Java 21 |
-| Fabric | Loader 0.16.10+、Fabric API 0.115.0+1.21.1 或更高的 1.21.1 版本 |
+| Fabric | Loader 0.16.10+；不需要 Fabric API 或其他前置模组 |
 | NeoForge | 21.1.84 或兼容的 21.1.x 版本 |
 | OneBot | OneBot 11 正向 WebSocket，支持 `ws://` 与 `wss://` |
 
-- Fabric 使用文件名以 `-fabric.jar` 结尾的产物，并安装 Fabric API。
+- Fabric 使用文件名以 `-fabric.jar` 结尾的产物，只需安装 McBot。
 - NeoForge 使用文件名以 `-neoforge.jar` 结尾的产物。
 - 不要同时安装两个加载器的产物，也不要在其他 Minecraft 版本中使用这些 JAR。
-- Jupiter 配置库和 OneBot Client 已内置；Mod Menu 11.0.3+ 是 Fabric 的可选依赖。
+- 配置核心和 OneBot Client 已内置；Mod Menu 11.0.3+ 仅用于可选的客户端配置界面。
 
 ## 安装与连接
 
-1. 将对应加载器的 McBot JAR 放入服务器 `mods` 目录；Fabric 还需安装 Fabric API。
+1. 将对应加载器的 McBot JAR 放入服务器 `mods` 目录，不需要安装其他前置模组。
 2. 启动一次服务器，生成 `mcbot/config.json` 和 `mcbot/cmds/`。
 3. 在 NapCatQQ、Lagrange.OneBot 等实现中启用 OneBot 11 正向 WebSocket。
 4. 在配置文件或游戏内命令中设置地址、机器人 QQ、令牌和互通群号。

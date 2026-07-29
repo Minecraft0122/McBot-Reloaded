@@ -5,7 +5,10 @@
     "mixins": [
         "ServerPlayerMixin",
         "PlayerAdvancementsMixin",
-        "ServerGamePktImplMixin"
+        "ServerGamePktImplMixin",
+        "MinecraftServerMixin",
+        "CommandsMixin",
+        "PlayerListMixin"
     ],
     "client": [
     ],
