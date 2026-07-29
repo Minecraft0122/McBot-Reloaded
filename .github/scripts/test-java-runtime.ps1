@@ -12,7 +12,7 @@ param(
     [string] $LoaderVersion,
 
     [Parameter(Mandatory = $true)]
-    [ValidateSet(21, 25)]
+    [ValidateSet(17, 21, 25)]
     [int] $ExpectedJava,
 
     [ValidateRange(60, 600)]
