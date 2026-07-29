@@ -39,6 +39,65 @@ dependencies {
     modImplementation include("curse.maven:jupiter-1072905:$jupiter_neoforge_version")
 }
 
+def stripEmbeddedJupiterTests = { File modJar ->
+    File temporaryJar = new File(modJar.parentFile, "${modJar.name}.without-jupiter-tests")
+    int embeddedJars = 0
+    int removedClasses = 0
+
+    def copyStream = { InputStream input, OutputStream output ->
+        byte[] buffer = new byte[8192]
+        int length
+        while ((length = input.read(buffer)) >= 0) {
+            output.write(buffer, 0, length)
+        }
+    }
+
+    def filterJupiter = { byte[] originalJar ->
+        ByteArrayOutputStream filteredBytes = new ByteArrayOutputStream()
+        new java.util.zip.ZipInputStream(new ByteArrayInputStream(originalJar)).withCloseable { input ->
+            new java.util.zip.ZipOutputStream(filteredBytes).withCloseable { output ->
+                java.util.zip.ZipEntry entry
+                while ((entry = input.nextEntry) != null) {
+                    if (entry.name.startsWith('com/iafenvoy/jupiter/test/')) {
+                        removedClasses++
+                        continue
+                    }
+                    output.putNextEntry(new java.util.zip.ZipEntry(entry.name))
+                    if (!entry.directory) copyStream(input, output)
+                    output.closeEntry()
+                }
+            }
+        }
+        filteredBytes.toByteArray()
+    }
+
+    new java.util.zip.ZipFile(modJar).withCloseable { input ->
+        new java.util.zip.ZipOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryJar))).withCloseable { output ->
+            input.entries().each { entry ->
+                output.putNextEntry(new java.util.zip.ZipEntry(entry.name))
+                if (!entry.directory) {
+                    input.getInputStream(entry).withCloseable { entryInput ->
+                        if (entry.name.startsWith('META-INF/jars/jupiter-') && entry.name.endsWith('.jar')) {
+                            embeddedJars++
+                            output.write(filterJupiter(entryInput.bytes))
+                        } else {
+                            copyStream(entryInput, output)
+                        }
+                    }
+                }
+                output.closeEntry()
+            }
+        }
+    }
+
+    if (embeddedJars != 1 || removedClasses == 0) {
+        temporaryJar.delete()
+        throw new GradleException("Jupiter 清理结果异常：内置 JAR=${embeddedJars}，移除测试条目=${removedClasses}")
+    }
+    java.nio.file.Files.move(temporaryJar.toPath(), modJar.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+    logger.lifecycle("已从 ${modJar.name} 的内置 Jupiter 中移除 ${removedClasses} 个测试条目")
+}
+
 processResources {
     inputs.property 'version', project.version
 
@@ -55,6 +114,9 @@ shadowJar {
 remapJar {
     inputFile.set shadowJar.archiveFile
     archiveClassifier = "neoforge"
+    doLast {
+        stripEmbeddedJupiterTests(archiveFile.get().asFile)
+    }
 }
 
 jar {
