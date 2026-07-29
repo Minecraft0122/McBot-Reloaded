@@ -61,6 +61,8 @@ Java 21、25 会在每次正式分支变更时分别启动 Fabric、NeoForge 专
 
 Fabric 和 NeoForge 的可安装产物分别位于 `fabric/build/libs/` 与 `neoforge/build/libs/`。Java 25 是服务端运行兼容目标，不应直接替代本分支的 Gradle 基准 JDK；GitHub Actions 会把构建 JDK 与服务端运行 JDK 分离。每次推送和拉取请求都会自动测试、构建，并分别使用 Java 21、25 完成真实服务端启动、McBot 加载和正常关服测试；正式版本由仓库的统一发布流程生成。
 
+测试任务、通过条件、证据保留和发布门禁以仓库中的 [GitHub 测试规范](TESTING_STANDARD.md) 为准。本地测试仅用于开发反馈，GitHub Actions 的 `质量门禁` 是合并和发布的正式依据。
+
 ## 反馈与许可
 
 问题请提交到 [Minecraft0122/McBot-Reloaded Issues](https://github.com/Minecraft0122/McBot-Reloaded/issues)，并附上 Minecraft、Java、加载器、McBot 版本、完整日志和脱敏配置。

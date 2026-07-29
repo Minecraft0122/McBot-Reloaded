@@ -122,3 +122,33 @@ jobs:
           path: |
             build/java-runtime/${{ matrix.loader.name }}-java-${{ matrix.java }}/logs/
             build/java-runtime/${{ matrix.loader.name }}-java-${{ matrix.java }}/crash-reports/
+
+  quality-gate:
+    name: '质量门禁'
+    if: ${{ always() }}
+    needs:
+      - build
+      - java-runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: '汇总并判定测试结果'
+        shell: bash
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          RUNTIME_RESULT: ${{ needs.java-runtime.result }}
+        run: |
+          {
+            echo '## McBot 质量门禁'
+            echo
+            echo "- 编译、单元测试与正式 JAR：${BUILD_RESULT}"
+            echo "- Java 21/25 服务端运行矩阵：${RUNTIME_RESULT}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$BUILD_RESULT" != 'success' || "$RUNTIME_RESULT" != 'success' ]]; then
+            echo '一个或多个必需测试未通过。' >&2
+            exit 1
+          fi
+
+          echo '- 结论：允许合并。' >> "$GITHUB_STEP_SUMMARY"
