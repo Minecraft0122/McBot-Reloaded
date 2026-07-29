@@ -59,7 +59,7 @@ jobs:
           path: common/build/reports/tests/
 
   java-runtime:
-    name: 'Java ${{ matrix.java }} / ${{ matrix.loader }} 服务端启动测试'
+    name: 'Java ${{ matrix.java }} / ${{ matrix.loader.name }} 服务端启动测试'
     runs-on: windows-latest
     timeout-minutes: 30
     strategy:
@@ -69,8 +69,10 @@ jobs:
           - '21'
           - '25'
         loader:
-          - fabric
-          - neoforge
+          - name: fabric
+            version: '0.19.3'
+          - name: neoforge
+            version: '21.1.244'
 
     steps:
       - name: '检出仓库'
@@ -97,11 +99,17 @@ jobs:
         with:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
 
-      - name: '使用 Java ${{ matrix.java }} 启动并关闭服务端'
+      - name: '构建 ${{ matrix.loader.name }} 正式 JAR'
+        shell: pwsh
+        run: .\gradlew.bat ':${{ matrix.loader.name }}:remapJar' --no-daemon --stacktrace
+
+      - name: '使用 Java ${{ matrix.java }} 安装、启动并关闭服务端'
         shell: pwsh
         run: >-
           .\.github\scripts\test-java-runtime.ps1
-          -Loader '${{ matrix.loader }}'
+          -Loader '${{ matrix.loader.name }}'
+          -MinecraftVersion '1.21.1'
+          -LoaderVersion '${{ matrix.loader.version }}'
           -ExpectedJava ${{ matrix.java }}
 
       - name: '上传服务端日志'
@@ -109,10 +117,8 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           if-no-files-found: ignore
-          name: java-${{ matrix.java }}-${{ matrix.loader }}-server-logs-${{ github.sha }}
+          name: java-${{ matrix.java }}-${{ matrix.loader.name }}-server-logs-${{ github.sha }}
           retention-days: 7
           path: |
-            run/logs/
-            run/crash-reports/
-            ${{ matrix.loader }}/run/logs/
-            ${{ matrix.loader }}/run/crash-reports/
+            build/java-runtime/${{ matrix.loader.name }}-java-${{ matrix.java }}/logs/
+            build/java-runtime/${{ matrix.loader.name }}-java-${{ matrix.java }}/crash-reports/

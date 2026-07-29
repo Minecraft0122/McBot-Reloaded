@@ -13,6 +13,13 @@ credits = "${credits}"
 description = '''${description}'''
 #logoFile = ""
 [[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neoforge_version_range}"
+ordering = "NONE"
+side = "SERVER"
+
+[[dependencies.${mod_id}]]
 modId = "minecraft"
 type = "required"
 versionRange = "${minecraft_version_range}"
